@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/PlayerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <include layout="@layout/player" />
+
+    <ProgressBar
+        android:id="@+id/Waiting"
+        style="@android:style/Widget.Holo.Light.ProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/Uri"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="Uri"
+        android:textColor="#999"
+        android:textSize="22sp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:onClick="onSub"
+                android:text="Button"
+                android:textColor="#999"
+                android:textSize="22sp" />
+
+            <Button
+                android:id="@+id/ButtonStop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:onClick="onStopEvent"
+                android:text="Stop"
+                android:textColor="#999"
+                android:textSize="22sp" />
+
+            <Button
+                android:id="@+id/ButtonStart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:onClick="onStartEvent"
+                android:text="Start 哈哈哈"
+                android:textColor="#999"
+                android:textSize="22sp" />
+
+            <Button
+                android:id="@+id/ButtonGetVolume"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:onClick="onGetVolumeEvent"
+                android:text="Get.Volume"
+                android:textColor="#999"
+                android:textSize="22sp" />
+
+            <Button
+                android:id="@+id/ButtonGetMediaInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:onClick="onGetMediaInfoEvent"
+                android:text="Get.MediaInfo"
+                android:textColor="#999"
+                android:textSize="22sp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
+

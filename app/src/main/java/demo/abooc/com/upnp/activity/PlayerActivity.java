@@ -1,0 +1,386 @@
+package demo.abooc.com.upnp.activity;
+
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.SeekBar;
+import android.widget.TextView;
+
+import com.abooc.upnp.DeviceDisplay;
+import com.abooc.upnp.DeviceListCache;
+import com.abooc.upnp.OnGotMediaInfoCallback;
+import com.abooc.upnp.OnRendererListener;
+import com.abooc.upnp.PlayerInfo;
+import com.abooc.upnp.Renderer;
+import com.abooc.upnp.RendererPlayer;
+import com.abooc.util.Debug;
+
+import org.fourthline.cling.model.ModelUtil;
+import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
+import org.fourthline.cling.support.contentdirectory.DIDLParser;
+import org.fourthline.cling.support.model.DIDLAttribute;
+import org.fourthline.cling.support.model.DIDLContent;
+import org.fourthline.cling.support.model.DIDLObject;
+import org.fourthline.cling.support.model.MediaInfo;
+import org.fourthline.cling.support.model.PositionInfo;
+import org.fourthline.cling.support.model.Res;
+import org.fourthline.cling.support.model.TransportState;
+import org.fourthline.cling.support.model.item.Item;
+import org.fourthline.cling.support.model.item.VideoItem;
+
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+
+import demo.abooc.com.upnp.AppTestResources;
+import demo.abooc.com.upnp.R;
+import demo.abooc.com.upnp.UPnP;
+
+/**
+ * 播放控制页
+ */
+public class PlayerActivity extends AppCompatActivity
+        implements View.OnClickListener, Observer {
+
+    public static void launch(Context context) {
+        Intent intent = new Intent(context, PlayerActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        context.startActivity(intent);
+    }
+
+    private VideoPlayerView mVideoPlayerView;
+    private TextView mTextUri;
+    private View mWaitingView;
+
+    private Renderer mRenderer;
+    private RendererPlayer mRendererPlayer;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mRenderer = Renderer.get();
+        mRendererPlayer = RendererPlayer.build(mRenderer);
+        mRendererPlayer.startTrack();
+        mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
+
+        DeviceDisplay deviceDisplay = DeviceListCache.getInstance().getCheckedDevice();
+        getSupportActionBar().setSubtitle("连接设备：" + deviceDisplay.getDevice().getFriendlyName());
+
+        setContentView(R.layout.activity_player);
+        View player = findViewById(R.id.Player);
+        mVideoPlayerView = new VideoPlayerView(player);
+        mVideoPlayerView.setOnSeekBarChangeListener(iOnSeekBarChangeListener);
+        mVideoPlayerView.attachRouterEvent(this, iOnSeekBarChangeListener);
+        mVideoPlayerView.setOnButtonClickListener(this);
+        mTextUri = (TextView) findViewById(R.id.Uri);
+        mWaitingView = findViewById(R.id.Waiting);
+
+    }
+
+    private OnRendererListener.SimpleOnRendererListener mSimpleOnRendererListener =
+            new OnRendererListener.SimpleOnRendererListener() {
+                @Override
+                public void onRemotePlaying() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mVideoPlayerView.setState(TransportState.PLAYING);
+                            mVideoPlayerView.setTitle("正在播放...");
+                        }
+                    });
+                }
+
+                @Override
+                public void onRemotePaused() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mVideoPlayerView.setState(TransportState.PAUSED_PLAYBACK);
+                            mVideoPlayerView.setTitle("暂停中...");
+                        }
+                    });
+                }
+
+                @Override
+                public void onRemoteStopped() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mVideoPlayerView.setState(TransportState.STOPPED);
+                            mVideoPlayerView.setTitle("没有媒体在播放");
+                        }
+                    });
+                }
+
+                @Override
+                public void onRemoteProgressChanged(final PositionInfo positionInfo) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mVideoPlayerView.setPositionInfo(positionInfo);
+                        }
+                    });
+                }
+            };
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mVideoPlayerView.setState(TransportState.NO_MEDIA_PRESENT);
+        mVideoPlayerView.setTitle("投屏");
+
+        mRenderer = Renderer.get();
+        mRendererPlayer = RendererPlayer.build(mRenderer);
+        mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
+
+        DeviceDisplay deviceDisplay = DeviceListCache.getInstance().getCheckedDevice();
+        getSupportActionBar().setSubtitle("连接设备：" + deviceDisplay.getDevice().getFriendlyName());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.player, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_switch:
+                ScanActivity.launch(this);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mRendererPlayer.getPositionInfo();
+        mRendererPlayer.getMediaInfo(mMediaInfoCallback);
+        mRenderer.getMute();
+        mRenderer.getVolume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    private OnGotMediaInfoCallback mMediaInfoCallback = new OnGotMediaInfoCallback() {
+        @Override
+        public void onGotMediaInfo(final MediaInfo mediaInfo) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setMediaInfo(mediaInfo);
+                }
+            });
+        }
+    };
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.Play:
+                if (mRenderer.getPlayerInfo().isStop()
+                        || mRenderer.getPlayerInfo().getTransportState() == TransportState.NO_MEDIA_PRESENT) {
+//                    mRendererPlayer.addCallback(onSendListener);
+
+                    Res res = UPnP.buildRes("video/*", AppTestResources.videoUri, AppTestResources.videoUri, 0);
+                    VideoItem videoItem = new VideoItem("1", String.valueOf(1), "天空之城[高清国语]", "creator", res);
+
+
+                    DIDLAttribute attribute = new DIDLAttribute("", "", "类型");
+                    videoItem.addProperty(new DIDLObject.Property.SEC.TYPE(attribute));
+                    String metadata = UPnP.buildMetadataXml(videoItem);
+
+
+                    mRendererPlayer.start(AppTestResources.videoUri, metadata);
+                } else {
+                    mRendererPlayer.play();
+                }
+                break;
+            case R.id.Pause:
+                mRendererPlayer.pause();
+                break;
+            case R.id.VolumeMute:
+                boolean mute = !mRenderer.getPlayerInfo().isMute();
+                mRenderer.setMute(mute);
+//                mVideoPlayerView.setMute(mute);
+                break;
+        }
+    }
+
+    private SeekBar.OnSeekBarChangeListener iOnSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            switch (seekBar.getId()) {
+                case R.id.Seek:
+                    String time = ModelUtil.toTimeString(progress);
+                    mVideoPlayerView.setProgressTime(time);
+                    break;
+                case R.id.SeekVolume:
+                    mVideoPlayerView.setVolume(progress);
+                    break;
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            switch (seekBar.getId()) {
+                case R.id.Seek:
+                    mRenderer.getPlayerInfo().update(TransportState.TRANSITIONING);
+                    break;
+            }
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            int progress = seekBar.getProgress();
+            switch (seekBar.getId()) {
+                case R.id.SeekVolume:
+                    mRenderer.volume(progress);
+                    break;
+                case R.id.Seek:
+                    String time = ModelUtil.toTimeString(progress);
+                    mVideoPlayerView.setProgressTime(time);
+
+                    mRendererPlayer.seek(time);
+                    break;
+            }
+        }
+    };
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                long volume1 = mRenderer.getPlayerInfo().getVolume();
+                mRenderer.volume(Math.min(100, volume1 + 10));
+                return true;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                long volume2 = mRenderer.getPlayerInfo().getVolume();
+                mRenderer.volume(Math.max(0, volume2 - 10));
+                return true;
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        PlayerInfo playerInfo = mRenderer.getPlayerInfo();
+
+        TransportState playState = playerInfo.getTransportState();
+        long volume = playerInfo.getVolume();
+        boolean mute = playerInfo.isMute();
+
+        updateStateMessage(playState);
+        mVideoPlayerView.setState(playState);
+        mVideoPlayerView.setVolume((int) volume);
+        mVideoPlayerView.seekVolume((int) volume);
+        mVideoPlayerView.setMute(mute);
+
+        MediaInfo mediaInfo = playerInfo.getMediaInfo();
+        if (mediaInfo != null) {
+            setMediaInfo(mediaInfo);
+        }
+    }
+
+    private void setMediaInfo(MediaInfo mediaInfo) {
+        String currentURIMetaData = mediaInfo.getCurrentURIMetaData();
+        AVTransportVariable.CurrentTrackMetaData trackMetaData = new AVTransportVariable.CurrentTrackMetaData(currentURIMetaData);
+        mTextUri.setText(trackMetaData.getName() + ", " + mediaInfo.getCurrentURI());
+
+        parseCurrentURIMetaData(mediaInfo.getCurrentURIMetaData());
+    }
+
+    private DIDLParser mDIDLParser = new DIDLParser();
+
+    private String parseCurrentURIMetaData(String xml) {
+        if (xml == null || "".equals(xml)) return null;
+//        Debug.anchor(xml);
+        try {
+            DIDLContent didlContent = mDIDLParser.parse(xml);
+            List<Item> items = didlContent.getItems();
+            if (items.isEmpty()) return null;
+            Item item = items.get(0);
+            String title = item.getTitle();
+            getSupportActionBar().setTitle(title);
+
+//            String itemId = item.getId();
+//            String refID = item.getRefID();
+//            String parentID = item.getParentID();
+//            boolean restricted = item.isRestricted();
+
+//            Debug.anchor(
+//                    "itemId:" + itemId + "\n"
+//                            + "refID:" + refID + "\n"
+//                            + "parentID:" + parentID + "\n"
+//                            + "是否保密:" + restricted + "\n"
+//                            + ToString.toString(items));
+            return title;
+        } catch (Exception e) {
+            Debug.e(e);
+        }
+        return null;
+    }
+
+
+    private void updateStateMessage(TransportState state) {
+        switch (state) {
+            case NO_MEDIA_PRESENT:
+                mVideoPlayerView.setTitle("没有媒体在播放");
+                break;
+            case RECORDING:
+                mVideoPlayerView.setTitle("准备播放...");
+                break;
+            case PLAYING:
+                mVideoPlayerView.setTitle("正在播放...");
+                break;
+            case PAUSED_PLAYBACK:
+                mVideoPlayerView.setTitle("暂停中...");
+                break;
+            case STOPPED:
+                mVideoPlayerView.setTitle("播放已停止");
+                break;
+            case TRANSITIONING:
+                mVideoPlayerView.setTitle("Seek...");
+                break;
+        }
+    }
+
+    public void onStopEvent(View view) {
+        mRendererPlayer.stop();
+    }
+
+    public void onStartEvent(View view) {
+//        3
+        mRendererPlayer.start(AppTestResources.videoUri, "哈哈哈");
+    }
+
+    public void onGetVolumeEvent(View view) {
+        mRenderer.getVolume();
+    }
+
+    public void onGetMediaInfoEvent(View view) {
+        mRendererPlayer.getMediaInfo(mMediaInfoCallback);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mRendererPlayer.stop();
+        mRendererPlayer.stopTrack();
+        DeviceListCache.getInstance().clearChecked();
+    }
+}
