@@ -18,6 +18,7 @@ import com.abooc.upnp.Player;
 import com.abooc.upnp.PlayerInfo;
 import com.abooc.upnp.Renderer;
 import com.abooc.upnp.RendererPlayer;
+import com.abooc.upnp.extra.OnActionListener;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.util.Debug;
@@ -439,7 +440,7 @@ public class KidsActivity extends AppCompatActivity
     }
 
 
-    Renderer.OnActionListener onActionListener = new Renderer.OnActionListener() {
+    private OnActionListener onActionListener = new OnActionListener() {
         @Override
         public void onSend() {
             runOnUiThread(new Runnable() {

@@ -1,5 +1,6 @@
 package com.abooc.upnp;
 
+import com.abooc.upnp.extra.OnActionListener;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.util.Debug;
 
@@ -21,20 +22,6 @@ import org.fourthline.cling.support.renderingcontrol.callback.SetVolume;
  * on 16/7/21.
  */
 public class Renderer {
-
-    public interface OnActionListener {
-        void onSend();
-
-        void onSendFinish(boolean success);
-    }
-
-    public static class SimpleOnActionListener implements OnActionListener {
-        public void onSend() {
-        }
-
-        public void onSendFinish(boolean success) {
-        }
-    }
 
     private PlayerInfo mPlayerInfo;
     private ControlPoint mControlPoint;

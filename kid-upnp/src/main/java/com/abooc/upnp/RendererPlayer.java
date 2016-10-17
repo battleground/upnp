@@ -2,6 +2,7 @@ package com.abooc.upnp;
 
 import android.util.Log;
 
+import com.abooc.upnp.extra.OnActionListener;
 import com.abooc.upnp.extra.OnGotMediaInfoCallback;
 import com.abooc.upnp.extra.OnRendererListener;
 import com.abooc.util.Debug;
@@ -31,7 +32,7 @@ import org.fourthline.cling.support.renderingcontrol.callback.SetMute;
  * email:allnet@live.cn
  * on 16/7/12.
  */
-public class RendererPlayer implements Runnable, Player, Renderer.OnActionListener {
+public class RendererPlayer implements Runnable, Player, OnActionListener {
 
     private static final RendererPlayer mOur = new RendererPlayer();
     private Renderer iRenderer;
@@ -70,9 +71,9 @@ public class RendererPlayer implements Runnable, Player, Renderer.OnActionListen
         return iRenderer.getRenderingControlService();
     }
 
-    private Renderer.OnActionListener iTempOnActionListener;
+    private OnActionListener iTempOnActionListener;
 
-    public void addCallback(Renderer.OnActionListener listener) {
+    public void addCallback(OnActionListener listener) {
         iTempOnActionListener = listener;
     }
 
