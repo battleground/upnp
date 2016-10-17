@@ -1,5 +1,7 @@
 package demo.abooc.com.upnp;
 
+import com.abooc.util.Debug;
+
 import org.fourthline.cling.support.contentdirectory.DIDLParser;
 import org.fourthline.cling.support.model.DIDLContent;
 import org.fourthline.cling.support.model.Res;
@@ -7,6 +9,7 @@ import org.fourthline.cling.support.model.item.Item;
 import org.seamless.util.MimeType;
 
 import java.net.URI;
+import java.util.List;
 
 /**
  * Created by author:李瑞宇
@@ -34,4 +37,34 @@ public class UPnP {
         res.setImportUri(URI.create(url));
         return res;
     }
+
+
+    private static DIDLParser mDIDLParser = new DIDLParser();
+    public static Item parseCurrentURIMetaData(String xml) {
+        if (xml == null || "".equals(xml)) return null;
+//        Debug.anchor(xml);
+        try {
+            DIDLContent didlContent = mDIDLParser.parse(xml);
+            List<Item> items = didlContent.getItems();
+            if (items.isEmpty()) return null;
+            Item item = items.get(0);
+
+//            String itemId = item.getId();
+//            String refID = item.getRefID();
+//            String parentID = item.getParentID();
+//            boolean restricted = item.isRestricted();
+
+//            Debug.anchor(
+//                    "itemId:" + itemId + "\n"
+//                            + "refID:" + refID + "\n"
+//                            + "parentID:" + parentID + "\n"
+//                            + "是否保密:" + restricted + "\n"
+//                            + ToString.toString(items));
+            return item;
+        } catch (Exception e) {
+            Debug.e(e);
+        }
+        return null;
+    }
+
 }

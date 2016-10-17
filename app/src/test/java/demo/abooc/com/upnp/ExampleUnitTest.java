@@ -25,7 +25,7 @@ public class ExampleUnitTest {
     public void metadataXml() {
         MimeType mimeType = new MimeType("video", "vr");
         Res res = UPnP.buildRes(mimeType.toString(), AppTestResources.videoUri, AppTestResources.videoUri, 0);
-        VRVideoItem videoItem = new VRVideoItem("1", String.valueOf(1), "天空之城[高清国语]", "creator", res);
+        VRVideoItem videoItem = new VRVideoItem(3, "1", String.valueOf(1), "天空之城[高清国语]", "creator", res);
 
         String metadata = UPnP.buildMetadataXml(videoItem);
 

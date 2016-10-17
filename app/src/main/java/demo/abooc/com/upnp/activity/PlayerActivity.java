@@ -18,28 +18,22 @@ import com.abooc.upnp.OnRendererListener;
 import com.abooc.upnp.PlayerInfo;
 import com.abooc.upnp.Renderer;
 import com.abooc.upnp.RendererPlayer;
-import com.abooc.util.Debug;
 
 import org.fourthline.cling.model.ModelUtil;
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
-import org.fourthline.cling.support.contentdirectory.DIDLParser;
-import org.fourthline.cling.support.model.DIDLAttribute;
-import org.fourthline.cling.support.model.DIDLContent;
-import org.fourthline.cling.support.model.DIDLObject;
 import org.fourthline.cling.support.model.MediaInfo;
 import org.fourthline.cling.support.model.PositionInfo;
 import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.TransportState;
 import org.fourthline.cling.support.model.item.Item;
-import org.fourthline.cling.support.model.item.VideoItem;
 
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import demo.abooc.com.upnp.AppTestResources;
 import demo.abooc.com.upnp.R;
 import demo.abooc.com.upnp.UPnP;
+import demo.abooc.com.upnp.model.VRVideoItem;
 
 /**
  * 播放控制页
@@ -173,6 +167,36 @@ public class PlayerActivity extends AppCompatActivity
         super.onPause();
     }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.Play:
+                if (mRenderer.getPlayerInfo().isStop()
+                        || mRenderer.getPlayerInfo().getTransportState() == TransportState.NO_MEDIA_PRESENT) {
+//                    mRendererPlayer.addCallback(onSendListener);
+
+                    Res res = UPnP.buildRes("video/*", AppTestResources.videoUri, AppTestResources.videoUri, 0);
+                    VRVideoItem videoItem = new VRVideoItem(0, "1", String.valueOf(1), "天空之城[高清国语]", "creator", res);
+                    String metadata = UPnP.buildMetadataXml(videoItem);
+
+                    mRendererPlayer.start(AppTestResources.videoUri, metadata);
+                } else {
+                    mRendererPlayer.play();
+                }
+                mVideoPlayerView.setState(TransportState.PLAYING);
+                break;
+            case R.id.Pause:
+                mRendererPlayer.pause();
+                mVideoPlayerView.setState(TransportState.PAUSED_PLAYBACK);
+                break;
+            case R.id.VolumeMute:
+                boolean mute = !mRenderer.getPlayerInfo().isMute();
+                mRenderer.setMute(mute);
+                mVideoPlayerView.setMute(mute);
+                break;
+        }
+    }
+
     private OnGotMediaInfoCallback mMediaInfoCallback = new OnGotMediaInfoCallback() {
         @Override
         public void onGotMediaInfo(final MediaInfo mediaInfo) {
@@ -184,39 +208,6 @@ public class PlayerActivity extends AppCompatActivity
             });
         }
     };
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.Play:
-                if (mRenderer.getPlayerInfo().isStop()
-                        || mRenderer.getPlayerInfo().getTransportState() == TransportState.NO_MEDIA_PRESENT) {
-//                    mRendererPlayer.addCallback(onSendListener);
-
-                    Res res = UPnP.buildRes("video/*", AppTestResources.videoUri, AppTestResources.videoUri, 0);
-                    VideoItem videoItem = new VideoItem("1", String.valueOf(1), "天空之城[高清国语]", "creator", res);
-
-
-                    DIDLAttribute attribute = new DIDLAttribute("", "", "类型");
-                    videoItem.addProperty(new DIDLObject.Property.SEC.TYPE(attribute));
-                    String metadata = UPnP.buildMetadataXml(videoItem);
-
-
-                    mRendererPlayer.start(AppTestResources.videoUri, metadata);
-                } else {
-                    mRendererPlayer.play();
-                }
-                break;
-            case R.id.Pause:
-                mRendererPlayer.pause();
-                break;
-            case R.id.VolumeMute:
-                boolean mute = !mRenderer.getPlayerInfo().isMute();
-                mRenderer.setMute(mute);
-//                mVideoPlayerView.setMute(mute);
-                break;
-        }
-    }
 
     private SeekBar.OnSeekBarChangeListener iOnSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
@@ -301,40 +292,9 @@ public class PlayerActivity extends AppCompatActivity
         AVTransportVariable.CurrentTrackMetaData trackMetaData = new AVTransportVariable.CurrentTrackMetaData(currentURIMetaData);
         mTextUri.setText(trackMetaData.getName() + ", " + mediaInfo.getCurrentURI());
 
-        parseCurrentURIMetaData(mediaInfo.getCurrentURIMetaData());
+        Item item = UPnP.parseCurrentURIMetaData(mediaInfo.getCurrentURIMetaData());
+        getSupportActionBar().setTitle(item.getTitle());
     }
-
-    private DIDLParser mDIDLParser = new DIDLParser();
-
-    private String parseCurrentURIMetaData(String xml) {
-        if (xml == null || "".equals(xml)) return null;
-//        Debug.anchor(xml);
-        try {
-            DIDLContent didlContent = mDIDLParser.parse(xml);
-            List<Item> items = didlContent.getItems();
-            if (items.isEmpty()) return null;
-            Item item = items.get(0);
-            String title = item.getTitle();
-            getSupportActionBar().setTitle(title);
-
-//            String itemId = item.getId();
-//            String refID = item.getRefID();
-//            String parentID = item.getParentID();
-//            boolean restricted = item.isRestricted();
-
-//            Debug.anchor(
-//                    "itemId:" + itemId + "\n"
-//                            + "refID:" + refID + "\n"
-//                            + "parentID:" + parentID + "\n"
-//                            + "是否保密:" + restricted + "\n"
-//                            + ToString.toString(items));
-            return title;
-        } catch (Exception e) {
-            Debug.e(e);
-        }
-        return null;
-    }
-
 
     private void updateStateMessage(TransportState state) {
         switch (state) {
@@ -361,11 +321,14 @@ public class PlayerActivity extends AppCompatActivity
 
     public void onStopEvent(View view) {
         mRendererPlayer.stop();
+        mVideoPlayerView.setState(TransportState.STOPPED);
     }
 
     public void onStartEvent(View view) {
-//        3
-        mRendererPlayer.start(AppTestResources.videoUri, "哈哈哈");
+        Res res = UPnP.buildRes("video/vr", AppTestResources.videoUri, AppTestResources.videoUri, 0);
+        VRVideoItem videoItem = new VRVideoItem(3, "1", String.valueOf(1), "天空之城[高清国语]", "creator", res);
+        String metadata = UPnP.buildMetadataXml(videoItem);
+        mRendererPlayer.start(AppTestResources.videoUri, metadata);
     }
 
     public void onGetVolumeEvent(View view) {
@@ -381,6 +344,7 @@ public class PlayerActivity extends AppCompatActivity
         super.onDestroy();
         mRendererPlayer.stop();
         mRendererPlayer.stopTrack();
+        mVideoPlayerView.setState(TransportState.STOPPED);
         DeviceListCache.getInstance().clearChecked();
     }
 }

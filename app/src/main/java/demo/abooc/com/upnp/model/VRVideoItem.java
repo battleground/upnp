@@ -5,9 +5,9 @@ import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.item.VideoItem;
 
 public class VRVideoItem extends VideoItem {
-    public VRVideoItem(String id, String parentID, String title, String creator, Res... resource) {
+    public VRVideoItem(int vType, String id, String parentID, String title, String creator, Res... resource) {
         super(id, parentID, title, creator, resource);
-        setType("3");
+        setType(String.valueOf(vType));
         setClazz(CLASS);
     }
 
