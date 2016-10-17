@@ -10,6 +10,7 @@ import org.fourthline.cling.model.gena.GENASubscription;
 import org.fourthline.cling.model.gena.RemoteGENASubscription;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Device;
+import org.fourthline.cling.model.meta.DeviceIdentity;
 import org.fourthline.cling.model.meta.Service;
 import org.fourthline.cling.model.state.StateVariableValue;
 import org.fourthline.cling.model.types.UDAServiceType;
@@ -31,31 +32,50 @@ import java.util.Map;
 public class RendererBuilder {
 
     private Device mBoundDevice;
+    private DeviceIdentity mIdentity;
     private String mBindSubscriptionId;
     private AndroidUpnpService mUpnpService;
+
+    private static RendererBuilder mOur = new RendererBuilder();
+
+    private RendererBuilder() {
+
+    }
+
+    public static RendererBuilder get() {
+        return mOur;
+    }
 
     public void bind(AndroidUpnpService upnpService, Device device, SimpleSubscriptionCallback callback) {
         mUpnpService = upnpService;
         mBoundDevice = device;
+        mIdentity = device.getIdentity();
         mSimpleSubscriptionCallback = callback;
 
         SubscriptionCallback(upnpService);
     }
 
-    private boolean isBound;
+    private boolean hasBound;
 
-    public boolean isBound() {
-        return isBound;
+    public boolean hasBound() {
+        return hasBound;
     }
 
     public Device getBoundDevice() {
         return mBoundDevice;
     }
 
+    public boolean isBound(Device device) {
+        return device.getIdentity().equals(mIdentity);
+    }
+
     public void unbind(AndroidUpnpService upnpService, Device device) {
-        RemoteGENASubscription remoteSubscription = upnpService.getRegistry().getRemoteSubscription(mBindSubscriptionId);
-        if (remoteSubscription != null) {
-            upnpService.getRegistry().removeRemoteSubscription(remoteSubscription);
+        if (device.getIdentity().equals(mIdentity)) {
+            mIdentity = null;
+            RemoteGENASubscription remoteSubscription = upnpService.getRegistry().getRemoteSubscription(mBindSubscriptionId);
+            if (remoteSubscription != null) {
+                upnpService.getRegistry().removeRemoteSubscription(remoteSubscription);
+            }
         }
     }
 
@@ -100,18 +120,23 @@ public class RendererBuilder {
 
             @Override
             public void established(GENASubscription sub) {
-                isBound = true;
+                hasBound = true;
                 mBindSubscriptionId = sub.getSubscriptionId();
                 Debug.anchor("Established: " + mBindSubscriptionId);
-                mSimpleSubscriptionCallback.established(sub);
+
+                if (mSimpleSubscriptionCallback != null) {
+                    mSimpleSubscriptionCallback.established(sub);
+                }
             }
 
             @Override
             protected void failed(GENASubscription subscription, UpnpResponse response, Exception exception, String defaultMsg) {
                 Debug.e(createDefaultFailureMessage(response, exception));
                 Toast.show("远端没有响应");
-                isBound = false;
-                mSimpleSubscriptionCallback.failed(subscription, response, exception, defaultMsg);
+                hasBound = false;
+                if (mSimpleSubscriptionCallback != null) {
+                    mSimpleSubscriptionCallback.failed(subscription, response, exception, defaultMsg);
+                }
             }
 
             @Override
@@ -119,13 +144,17 @@ public class RendererBuilder {
                 // Reason should be null, or it didn't end regularly
                 Debug.anchor();
                 Toast.show("订阅结束");
-                isBound = false;
-                mSimpleSubscriptionCallback.ended(sub, reason, response);
+                hasBound = false;
+                if (mSimpleSubscriptionCallback != null) {
+                    mSimpleSubscriptionCallback.ended(sub, reason, response);
+                }
             }
 
             @Override
             public void eventReceived(GENASubscription sub) {
-                mSimpleSubscriptionCallback.eventReceived(sub);
+                if (mSimpleSubscriptionCallback != null) {
+                    mSimpleSubscriptionCallback.eventReceived(sub);
+                }
                 Map<String, StateVariableValue> values = sub.getCurrentValues();
 
                 StateVariableValue variableValue = values.get("LastChange");
@@ -138,7 +167,9 @@ public class RendererBuilder {
 
                     if (state != null) {
                         Debug.anchor(state);
-                        mSimpleSubscriptionCallback.onEventReceived(state.getValue());
+                        if (mSimpleSubscriptionCallback != null) {
+                            mSimpleSubscriptionCallback.onEventReceived(state.getValue());
+                        }
                     }
 
                 } catch (Exception e) {

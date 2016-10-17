@@ -13,7 +13,6 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.abooc.upnp.extra.DevicesCache;
 import com.abooc.upnp.Discovery;
 import com.abooc.upnp.Player;
 import com.abooc.upnp.PlayerInfo;
@@ -39,7 +38,6 @@ import org.fourthline.cling.support.renderingcontrol.lastchange.ChannelVolume;
 import org.fourthline.cling.support.renderingcontrol.lastchange.RenderingControlLastChangeParser;
 import org.fourthline.cling.support.renderingcontrol.lastchange.RenderingControlVariable;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -95,25 +93,25 @@ public class KidsActivity extends AppCompatActivity
         mDiscovery = Discovery.get();
         mDiscovery.bindServer(this);
 
-        mDiscovery.addObserver(new Observer() {
-            @Override
-            public void update(Observable observable, Object data) {
-                ArrayList<DeviceDisplay> list = DevicesCache.getInstance().getList();
-                Debug.anchor(list.size());
-                listAdapter.update(list);
-                if (listAdapter.isEmpty()) {
-                    if (iUITimer.isRunning()) {
-                        mEmptyView.setText("Loading...");
-                    } else {
-                        mEmptyView.setText("没有可用的设备");
-                    }
-                }
-            }
-        });
+//        mDiscovery.addObserver(new Observer() {
+//            @Override
+//            public void update(Observable observable, Object data) {
+//                ArrayList<DeviceDisplay> list = DevicesCache.getInstance().getList();
+//                Debug.anchor(list.size());
+//                listAdapter.update(list);
+//                if (listAdapter.isEmpty()) {
+//                    if (iUITimer.isRunning()) {
+//                        mEmptyView.setText("Loading...");
+//                    } else {
+//                        mEmptyView.setText("没有可用的设备");
+//                    }
+//                }
+//            }
+//        });
 
         initUPnPView();
-        ArrayList<DeviceDisplay> list = DevicesCache.getInstance().getList();
-        listAdapter.update(list);
+//        ArrayList<DeviceDisplay> list = DevicesCache.getInstance().getList();
+//        listAdapter.update(list);
     }
 
     private UITimer iUITimer = new UITimer(2) {

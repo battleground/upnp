@@ -21,6 +21,7 @@ public class VideoPlayerView {
     TextView mTitleText;
     ImageView mPlayButton;
     ImageView mPauseButton;
+    ImageView mStopButton;
     ImageView mVolumeMute;
 
     TextView mProgressTime;
@@ -45,6 +46,7 @@ public class VideoPlayerView {
         mTitleText = (TextView) findViewById(R.id.title);
         mPlayButton = (ImageView) findViewById(R.id.Play);
         mPauseButton = (ImageView) findViewById(R.id.Pause);
+        mStopButton = (ImageView) findViewById(R.id.Stop);
         mVolumeMute = (ImageView) findViewById(R.id.VolumeMute);
         mVolumeValue = (TextView) findViewById(R.id.VolumeCurrentValue);
 
@@ -62,6 +64,7 @@ public class VideoPlayerView {
     public void setOnButtonClickListener(View.OnClickListener player) {
         mPlayButton.setOnClickListener(player);
         mPauseButton.setOnClickListener(player);
+        mStopButton.setOnClickListener(player);
     }
 
     public void setOnSeekBarChangeListener(SeekBar.OnSeekBarChangeListener changeListener) {

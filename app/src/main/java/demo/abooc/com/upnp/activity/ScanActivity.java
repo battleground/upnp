@@ -16,9 +16,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.abooc.upnp.extra.DevicesCache;
 import com.abooc.upnp.Discovery;
 import com.abooc.upnp.Renderer;
+import com.abooc.upnp.RendererBuilder;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.util.Debug;
@@ -29,13 +29,13 @@ import org.fourthline.cling.android.NetworkUtils;
 import org.fourthline.cling.model.message.header.DeviceTypeHeader;
 import org.fourthline.cling.model.message.header.STAllHeader;
 import org.fourthline.cling.model.message.header.ServiceTypeHeader;
+import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.types.DeviceType;
 import org.fourthline.cling.model.types.UDAServiceType;
+import org.fourthline.cling.registry.DefaultRegistryListener;
+import org.fourthline.cling.registry.Registry;
 import org.fourthline.cling.transport.Router;
 import org.fourthline.cling.transport.RouterException;
-
-import java.util.Observable;
-import java.util.Observer;
 
 import demo.abooc.com.upnp.DevicesListAdapter;
 import demo.abooc.com.upnp.R;
@@ -45,7 +45,7 @@ import demo.abooc.com.upnp.UITimer;
  * 扫描设备页
  */
 public class ScanActivity extends AppCompatActivity
-        implements AdapterView.OnItemClickListener, Observer {
+        implements AdapterView.OnItemClickListener {
 
     public static void launch(Context context) {
         Intent intent = new Intent(context, ScanActivity.class);
@@ -66,10 +66,40 @@ public class ScanActivity extends AppCompatActivity
         mEmptyView = (TextView) findViewById(android.R.id.empty);
 
         mDiscovery = Discovery.get();
-        /**
-         * 注册监听设备变化
-         */
-        mDiscovery.addObserver(this);
+        mDiscovery.addDefaultRegistryListener(new DefaultRegistryListener() {
+
+            @Override
+            public void remoteDeviceAdded(Registry registry, final RemoteDevice device) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        DeviceDisplay deviceDisplay = new DeviceDisplay(new CDevice(device));
+
+                        listAdapter.add(deviceDisplay);
+
+                        getSupportActionBar().setTitle("扫描设备...，已发现" + listAdapter.getCount() + "个");
+                    }
+                });
+            }
+
+            @Override
+            public void remoteDeviceRemoved(Registry registry, final RemoteDevice device) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        DeviceDisplay deviceDisplay = new DeviceDisplay(new CDevice(device));
+
+                        listAdapter.remove(deviceDisplay);
+                        if (listAdapter.isEmpty()) {
+                            if (!iUITimer.isRunning()) {
+                                mEmptyView.setText("没有可用的设备");
+                            }
+                        }
+                        getSupportActionBar().setTitle("扫描设备...，已发现" + listAdapter.getCount() + "个");
+                    }
+                });
+            }
+        });
 
         initUPnPView();
 
@@ -84,7 +114,6 @@ public class ScanActivity extends AppCompatActivity
         mListView.setEmptyView(mEmptyView);
         mListView.setOnItemClickListener(this);
         listAdapter = new DevicesListAdapter(this);
-        listAdapter.update(DevicesCache.getInstance().getList());
         mListView.setAdapter(listAdapter);
 
     }
@@ -204,35 +233,16 @@ public class ScanActivity extends AppCompatActivity
         }
     };
 
-    /**
-     * 设备变化时，回调
-     * @param observable
-     * @param data
-     */
-    @Override
-    public void update(Observable observable, Object data) {
-        listAdapter.update(DevicesCache.getInstance().getList());
-
-        if (listAdapter.isEmpty()) {
-            if (!iUITimer.isRunning()) {
-                mEmptyView.setText("没有可用的设备");
-            }
-        }
-        getSupportActionBar().setTitle("扫描设备...，已发现" + listAdapter.getCount() + "个");
-
-    }
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-        if (DevicesCache.getInstance().hasChecked()) {
-            DevicesCache.getInstance().clearChecked();
-        }
 
         DeviceDisplay mDeviceDisplay = listAdapter.getItem(position);
         mDeviceDisplay.setChecked(true);
         setTitle(mDeviceDisplay.getDevice().getFriendlyName());
-        Renderer.build(mDiscovery.getUpnpService().getControlPoint(), (CDevice) mDeviceDisplay.getDevice());
+        CDevice cDevice = (CDevice) mDeviceDisplay.getDevice();
+        Renderer.build(mDiscovery.getUpnpService().getControlPoint(), cDevice);
 
+        RendererBuilder.get().bind(mDiscovery.getUpnpService(), cDevice.getDevice(), null);
         PlayerActivity.launch(this);
         finish();
     }
@@ -240,7 +250,6 @@ public class ScanActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mDiscovery.deleteObserver(this);
         unregisterReceiver(iWiFiReceiver);
     }
 

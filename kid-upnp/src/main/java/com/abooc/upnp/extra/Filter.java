@@ -22,6 +22,7 @@ public class Filter implements Callable<Boolean> {
     @Override
     public Boolean call() {
 //        return (mDevice.findService(new UDAServiceType("RenderingControl")) != null);
-        return (mDevice.findService(new UDAServiceType("AVTransport")) != null);
+//        return (mDevice.findService(new UDAServiceType("AVTransport")) != null);
+        return true;
     }
 }

@@ -9,14 +9,8 @@ import android.content.ServiceConnection;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 
-import com.abooc.upnp.extra.DevicesCache;
-import com.abooc.upnp.model.CDevice;
-import com.abooc.upnp.model.DeviceDisplay;
-import com.abooc.upnp.extra.Filter;
 import com.abooc.util.Debug;
 
 import org.fourthline.cling.android.AndroidUpnpService;
@@ -27,16 +21,14 @@ import org.fourthline.cling.registry.Registry;
 import org.fourthline.cling.transport.Router;
 import org.fourthline.cling.transport.RouterException;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Observable;
 
 /**
  * Created by author:李瑞宇
  * email:allnet@live.cn
  * on 16/7/14.
  */
-public class Discovery extends Observable {
+public class Discovery {
 
     protected AndroidUpnpService mUPnPService;
 
@@ -57,14 +49,6 @@ public class Discovery extends Observable {
 
     };
 
-
-    private Filter mFilter = new Filter() {
-        @Override
-        public Boolean call() {
-            return true;
-        }
-    };
-
     private static Discovery mOur = new Discovery();
 
     private WifiReceiver iWifiReceiver;
@@ -76,10 +60,6 @@ public class Discovery extends Observable {
 
     public static Discovery get() {
         return mOur;
-    }
-
-    public void setFilter(Filter filter) {
-        mFilter = filter;
     }
 
     public void bindServer(Context context) {
@@ -116,54 +96,30 @@ public class Discovery extends Observable {
         mUPnPService.getControlPoint().search();
     }
 
+    public void addDefaultRegistryListener(DefaultRegistryListener listener) {
+        mDefaultRegistryListener = listener;
+    }
+
+    private DefaultRegistryListener mDefaultRegistryListener = new DefaultRegistryListener();
+
     private DefaultRegistryListener registryListener = new DefaultRegistryListener() {
 
         @Override
         public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
             super.remoteDeviceAdded(registry, device);
-            Debug.anchor(device.toString());
-            CallUI.sendMessage(Message.obtain(CallUI, HandlerWhat.ADD, device));
+            if (mDefaultRegistryListener != null) {
+                mDefaultRegistryListener.remoteDeviceAdded(registry, device);
+            }
         }
 
         @Override
         public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
             super.remoteDeviceRemoved(registry, device);
-            Debug.anchor();
-            CallUI.sendMessage(Message.obtain(CallUI, HandlerWhat.REMOVE, device));
-        }
-    };
-
-    private Handler CallUI = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            RemoteDevice device = (RemoteDevice) msg.obj;
-            ArrayList<DeviceDisplay> list = DevicesCache.getInstance().getList();
-            DeviceDisplay deviceDisplay = new DeviceDisplay(new CDevice(device));
-            switch (msg.what) {
-                case HandlerWhat.REMOVE:
-                    list.remove(deviceDisplay);
-                    break;
-                case HandlerWhat.ADD:
-                    if (!list.contains(deviceDisplay)) {
-                        list.add(deviceDisplay);
-                    }
-                    break;
+            if (mDefaultRegistryListener != null) {
+                mDefaultRegistryListener.remoteDeviceRemoved(registry, device);
             }
-            notifyObservers();
         }
     };
-
-    @Override
-    public void notifyObservers() {
-        setChanged();
-        super.notifyObservers();
-    }
-
-    public class HandlerWhat {
-        public static final int ADD = 0;
-        public static final int REMOVE = 1;
-        public static final int CLEAR_ALL = 3;
-    }
 
     private class WifiReceiver extends BroadcastReceiver {
 
@@ -178,8 +134,7 @@ public class Discovery extends Observable {
                             turnOnRouter();
                             break;
                         case DISCONNECTED:
-                            DevicesCache.getInstance().getList().clear();
-                            notifyObservers();
+                            removeAll();
                             turnOffRouter();
                             break;
                     }

@@ -11,14 +11,15 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.abooc.upnp.model.DeviceDisplay;
-import com.abooc.upnp.extra.DevicesCache;
+import com.abooc.upnp.Renderer;
+import com.abooc.upnp.RendererBuilder;
+import com.abooc.upnp.RendererPlayer;
 import com.abooc.upnp.extra.OnGotMediaInfoCallback;
 import com.abooc.upnp.extra.OnRendererListener;
-import com.abooc.upnp.Renderer;
-import com.abooc.upnp.RendererPlayer;
+import com.abooc.widget.Toast;
 
 import org.fourthline.cling.model.ModelUtil;
+import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
 import org.fourthline.cling.support.model.MediaInfo;
 import org.fourthline.cling.support.model.PositionInfo;
@@ -59,8 +60,9 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer.startTrack();
         mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
 
-        DeviceDisplay deviceDisplay = DevicesCache.getInstance().getCheckedDevice();
-        getSupportActionBar().setSubtitle("连接设备：" + deviceDisplay.getDevice().getFriendlyName());
+        Device boundDevice = RendererBuilder.get().getBoundDevice();
+        String friendlyName = boundDevice.getDetails().getFriendlyName();
+        getSupportActionBar().setSubtitle("连接设备：" + friendlyName);
 
         setContentView(R.layout.activity_player);
         View player = findViewById(R.id.Player);
@@ -129,8 +131,9 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer = RendererPlayer.build(mRenderer);
         mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
 
-        DeviceDisplay deviceDisplay = DevicesCache.getInstance().getCheckedDevice();
-        getSupportActionBar().setSubtitle("连接设备：" + deviceDisplay.getDevice().getFriendlyName());
+        Device boundDevice = RendererBuilder.get().getBoundDevice();
+        String friendlyName = boundDevice.getDetails().getFriendlyName();
+        getSupportActionBar().setSubtitle("连接设备：" + friendlyName);
     }
 
     @Override
@@ -186,6 +189,7 @@ public class PlayerActivity extends AppCompatActivity
                 mVideoPlayerView.setState(TransportState.PAUSED_PLAYBACK);
                 break;
             case R.id.Stop:
+                Toast.show("即将停止...");
                 mRendererPlayer.stop();
                 mVideoPlayerView.setState(TransportState.STOPPED);
                 break;
@@ -328,6 +332,5 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer.stop();
         mRendererPlayer.stopTrack();
         mVideoPlayerView.setState(TransportState.STOPPED);
-        DevicesCache.getInstance().clearChecked();
     }
 }

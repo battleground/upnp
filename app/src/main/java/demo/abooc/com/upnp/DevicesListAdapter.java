@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.abooc.upnp.model.DeviceDisplay;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ import java.util.List;
 public class DevicesListAdapter extends BaseAdapter {
 
     private Context mContext;
-    private List<DeviceDisplay> mList;
+    private List<DeviceDisplay> mList = new ArrayList<>();
 
     public DevicesListAdapter(Context context) {
         mContext = context;
@@ -43,6 +44,16 @@ public class DevicesListAdapter extends BaseAdapter {
 
     public void update(List objects) {
         mList = objects;
+        notifyDataSetChanged();
+    }
+
+    public void add(DeviceDisplay device) {
+        mList.add(device);
+        notifyDataSetChanged();
+    }
+
+    public void remove(DeviceDisplay device) {
+        mList.remove(device);
         notifyDataSetChanged();
     }
 
