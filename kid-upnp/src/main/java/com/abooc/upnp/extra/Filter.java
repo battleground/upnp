@@ -1,4 +1,4 @@
-package com.abooc.upnp;
+package com.abooc.upnp.extra;
 
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.types.UDAServiceType;

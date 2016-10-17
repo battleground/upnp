@@ -21,6 +21,8 @@ import org.fourthline.cling.support.model.TransportState;
 import java.util.Map;
 
 /**
+ * 负责绑定远端设备，订阅远端播放状态事件通知
+ * <p>
  * Created by author:李瑞宇
  * email:allnet@live.cn
  * on 16/10/13.

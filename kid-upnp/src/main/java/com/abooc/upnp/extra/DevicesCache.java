@@ -1,4 +1,6 @@
-package com.abooc.upnp;
+package com.abooc.upnp.extra;
+
+import com.abooc.upnp.model.DeviceDisplay;
 
 import java.util.ArrayList;
 
@@ -7,15 +9,15 @@ import java.util.ArrayList;
  * email:allnet@live.cn
  * on 16/8/10.
  */
-public class DeviceListCache {
+public class DevicesCache {
 
-    private static DeviceListCache ourInstance = new DeviceListCache();
+    private static DevicesCache ourInstance = new DevicesCache();
 
-    public static DeviceListCache getInstance() {
+    public static DevicesCache getInstance() {
         return ourInstance;
     }
 
-    private DeviceListCache() {
+    private DevicesCache() {
     }
 
     private ArrayList<DeviceDisplay> mList = new ArrayList<>();

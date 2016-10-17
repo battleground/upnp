@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.abooc.upnp.DeviceDisplay;
+import com.abooc.upnp.model.DeviceDisplay;
 
 import java.util.List;
 

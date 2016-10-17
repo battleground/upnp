@@ -13,6 +13,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 
+import com.abooc.upnp.extra.DevicesCache;
+import com.abooc.upnp.model.CDevice;
+import com.abooc.upnp.model.DeviceDisplay;
+import com.abooc.upnp.extra.Filter;
 import com.abooc.util.Debug;
 
 import org.fourthline.cling.android.AndroidUpnpService;
@@ -133,7 +137,7 @@ public class Discovery extends Observable {
         @Override
         public void handleMessage(Message msg) {
             RemoteDevice device = (RemoteDevice) msg.obj;
-            ArrayList<DeviceDisplay> list = DeviceListCache.getInstance().getList();
+            ArrayList<DeviceDisplay> list = DevicesCache.getInstance().getList();
             DeviceDisplay deviceDisplay = new DeviceDisplay(new CDevice(device));
             switch (msg.what) {
                 case HandlerWhat.REMOVE:
@@ -174,7 +178,7 @@ public class Discovery extends Observable {
                             turnOnRouter();
                             break;
                         case DISCONNECTED:
-                            DeviceListCache.getInstance().getList().clear();
+                            DevicesCache.getInstance().getList().clear();
                             notifyObservers();
                             turnOffRouter();
                             break;

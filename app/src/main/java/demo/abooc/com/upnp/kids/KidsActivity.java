@@ -13,15 +13,14 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.abooc.upnp.CDevice;
-import com.abooc.upnp.DeviceDisplay;
-import com.abooc.upnp.DeviceListCache;
+import com.abooc.upnp.extra.DevicesCache;
 import com.abooc.upnp.Discovery;
-import com.abooc.upnp.OnProgressUpdateListener;
 import com.abooc.upnp.Player;
 import com.abooc.upnp.PlayerInfo;
 import com.abooc.upnp.Renderer;
 import com.abooc.upnp.RendererPlayer;
+import com.abooc.upnp.model.CDevice;
+import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
 
@@ -35,7 +34,6 @@ import org.fourthline.cling.support.avtransport.lastchange.AVTransportLastChange
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
 import org.fourthline.cling.support.lastchange.EventedValue;
 import org.fourthline.cling.support.lastchange.LastChange;
-import org.fourthline.cling.support.model.PositionInfo;
 import org.fourthline.cling.support.model.TransportState;
 import org.fourthline.cling.support.renderingcontrol.lastchange.ChannelVolume;
 import org.fourthline.cling.support.renderingcontrol.lastchange.RenderingControlLastChangeParser;
@@ -100,7 +98,7 @@ public class KidsActivity extends AppCompatActivity
         mDiscovery.addObserver(new Observer() {
             @Override
             public void update(Observable observable, Object data) {
-                ArrayList<DeviceDisplay> list = DeviceListCache.getInstance().getList();
+                ArrayList<DeviceDisplay> list = DevicesCache.getInstance().getList();
                 Debug.anchor(list.size());
                 listAdapter.update(list);
                 if (listAdapter.isEmpty()) {
@@ -114,7 +112,7 @@ public class KidsActivity extends AppCompatActivity
         });
 
         initUPnPView();
-        ArrayList<DeviceDisplay> list = DeviceListCache.getInstance().getList();
+        ArrayList<DeviceDisplay> list = DevicesCache.getInstance().getList();
         listAdapter.update(list);
     }
 
@@ -394,19 +392,6 @@ public class KidsActivity extends AppCompatActivity
 
     }
 
-
-    OnProgressUpdateListener iOnProgressUpdateListener = new OnProgressUpdateListener() {
-        @Override
-        public void onChanged(final PositionInfo positionInfo) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mVideoPlayer.setPositionInfo(positionInfo);
-                }
-            });
-        }
-    };
-
     SeekBar.OnSeekBarChangeListener iOnSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -443,7 +428,7 @@ public class KidsActivity extends AppCompatActivity
                     String time = ModelUtil.toTimeString(progress);
                     mVideoPlayer.setProgressTime(time);
 
-                    ((RendererPlayer) mPlayer).addCallback(onSendListener);
+                    ((RendererPlayer) mPlayer).addCallback(onActionListener);
                     mPlayer.seek(time);
 //                    mRenderer.getPlayerInfo().setOnProgressUpdateListener(iOnProgressUpdateListener);
                     break;
@@ -456,7 +441,7 @@ public class KidsActivity extends AppCompatActivity
     }
 
 
-    Renderer.OnSendListener onSendListener = new Renderer.OnSendListener() {
+    Renderer.OnActionListener onActionListener = new Renderer.OnActionListener() {
         @Override
         public void onSend() {
             runOnUiThread(new Runnable() {
@@ -484,7 +469,7 @@ public class KidsActivity extends AppCompatActivity
             case R.id.Play:
                 if (mRenderer.getPlayerInfo().isStop()
                         || mRenderer.getPlayerInfo().getTransportState() == TransportState.NO_MEDIA_PRESENT) {
-                    getRendererPlayer().addCallback(onSendListener);
+                    getRendererPlayer().addCallback(onActionListener);
 
                     getRendererPlayer().start(videoUri, "");
                 } else {

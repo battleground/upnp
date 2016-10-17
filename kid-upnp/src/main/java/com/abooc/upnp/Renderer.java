@@ -1,5 +1,6 @@
 package com.abooc.upnp;
 
+import com.abooc.upnp.model.CDevice;
 import com.abooc.util.Debug;
 
 import org.fourthline.cling.controlpoint.ActionCallback;
@@ -21,13 +22,13 @@ import org.fourthline.cling.support.renderingcontrol.callback.SetVolume;
  */
 public class Renderer {
 
-    public interface OnSendListener {
+    public interface OnActionListener {
         void onSend();
 
         void onSendFinish(boolean success);
     }
 
-    public static class SimpleOnSendListener implements OnSendListener {
+    public static class SimpleOnActionListener implements OnActionListener {
         public void onSend() {
         }
 
@@ -38,7 +39,7 @@ public class Renderer {
     private PlayerInfo mPlayerInfo;
     private ControlPoint mControlPoint;
 
-    private OnSendListener iOnSendListener;
+    private OnActionListener iOnActionListener;
 
     private static Renderer mOur;
     private Device mDevice;
@@ -84,8 +85,8 @@ public class Renderer {
 //            Debug.anchor(actionCallback.getActionInvocation().getAction());
 //        }
         isSending = true;
-        if (iOnSendListener != null) {
-            iOnSendListener.onSend();
+        if (iOnActionListener != null) {
+            iOnActionListener.onSend();
         }
         mControlPoint.execute(actionCallback);
     }
@@ -111,15 +112,15 @@ public class Renderer {
                 mPlayerInfo.setVolume(volume);
 
                 isSending = false;
-                if (iOnSendListener != null) {
-                    iOnSendListener.onSendFinish(true);
+                if (iOnActionListener != null) {
+                    iOnActionListener.onSendFinish(true);
                 }
             }
 
             @Override
             public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
-                if (iOnSendListener != null) {
-                    iOnSendListener.onSendFinish(false);
+                if (iOnActionListener != null) {
+                    iOnActionListener.onSendFinish(false);
                 }
             }
         });
@@ -134,15 +135,15 @@ public class Renderer {
                 mPlayerInfo.setVolume(volume);
 
                 isSending = false;
-                if (iOnSendListener != null) {
-                    iOnSendListener.onSendFinish(true);
+                if (iOnActionListener != null) {
+                    iOnActionListener.onSendFinish(true);
                 }
             }
 
             @Override
             public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
-                if (iOnSendListener != null) {
-                    iOnSendListener.onSendFinish(false);
+                if (iOnActionListener != null) {
+                    iOnActionListener.onSendFinish(false);
                 }
             }
         });
@@ -157,15 +158,15 @@ public class Renderer {
                 mPlayerInfo.setMute(arg1);
 
                 isSending = false;
-                if (iOnSendListener != null) {
-                    iOnSendListener.onSendFinish(true);
+                if (iOnActionListener != null) {
+                    iOnActionListener.onSendFinish(true);
                 }
             }
 
             @Override
             public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
-                if (iOnSendListener != null) {
-                    iOnSendListener.onSendFinish(false);
+                if (iOnActionListener != null) {
+                    iOnActionListener.onSendFinish(false);
                 }
             }
         });

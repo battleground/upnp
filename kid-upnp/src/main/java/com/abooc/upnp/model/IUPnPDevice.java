@@ -17,7 +17,7 @@
  * along with DroidUPNP.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.abooc.upnp;
+package com.abooc.upnp.model;
 
 public interface IUPnPDevice {
 

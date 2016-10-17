@@ -11,10 +11,10 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.abooc.upnp.DeviceDisplay;
-import com.abooc.upnp.DeviceListCache;
-import com.abooc.upnp.OnGotMediaInfoCallback;
-import com.abooc.upnp.OnRendererListener;
+import com.abooc.upnp.model.DeviceDisplay;
+import com.abooc.upnp.extra.DevicesCache;
+import com.abooc.upnp.extra.OnGotMediaInfoCallback;
+import com.abooc.upnp.extra.OnRendererListener;
 import com.abooc.upnp.Renderer;
 import com.abooc.upnp.RendererPlayer;
 
@@ -59,7 +59,7 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer.startTrack();
         mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
 
-        DeviceDisplay deviceDisplay = DeviceListCache.getInstance().getCheckedDevice();
+        DeviceDisplay deviceDisplay = DevicesCache.getInstance().getCheckedDevice();
         getSupportActionBar().setSubtitle("连接设备：" + deviceDisplay.getDevice().getFriendlyName());
 
         setContentView(R.layout.activity_player);
@@ -129,7 +129,7 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer = RendererPlayer.build(mRenderer);
         mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
 
-        DeviceDisplay deviceDisplay = DeviceListCache.getInstance().getCheckedDevice();
+        DeviceDisplay deviceDisplay = DevicesCache.getInstance().getCheckedDevice();
         getSupportActionBar().setSubtitle("连接设备：" + deviceDisplay.getDevice().getFriendlyName());
     }
 
@@ -328,6 +328,6 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer.stop();
         mRendererPlayer.stopTrack();
         mVideoPlayerView.setState(TransportState.STOPPED);
-        DeviceListCache.getInstance().clearChecked();
+        DevicesCache.getInstance().clearChecked();
     }
 }

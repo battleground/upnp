@@ -20,6 +20,8 @@ interface Info {
 }
 
 /**
+ * 负责记录远端媒体播放状态、媒体信息、播放进度。
+ *
  * Created by author:李瑞宇
  * email:allnet@live.cn
  * on 16/7/12.
@@ -98,7 +100,7 @@ public class PlayerInfo extends Observable implements Info {
     }
 
     /**
-     * 更新状态记录
+     * 更新状态
      *
      * @param state
      */

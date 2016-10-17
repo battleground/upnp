@@ -16,11 +16,11 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.abooc.upnp.CDevice;
-import com.abooc.upnp.DeviceDisplay;
-import com.abooc.upnp.DeviceListCache;
+import com.abooc.upnp.extra.DevicesCache;
 import com.abooc.upnp.Discovery;
 import com.abooc.upnp.Renderer;
+import com.abooc.upnp.model.CDevice;
+import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
 
@@ -84,7 +84,7 @@ public class ScanActivity extends AppCompatActivity
         mListView.setEmptyView(mEmptyView);
         mListView.setOnItemClickListener(this);
         listAdapter = new DevicesListAdapter(this);
-        listAdapter.update(DeviceListCache.getInstance().getList());
+        listAdapter.update(DevicesCache.getInstance().getList());
         mListView.setAdapter(listAdapter);
 
     }
@@ -211,7 +211,7 @@ public class ScanActivity extends AppCompatActivity
      */
     @Override
     public void update(Observable observable, Object data) {
-        listAdapter.update(DeviceListCache.getInstance().getList());
+        listAdapter.update(DevicesCache.getInstance().getList());
 
         if (listAdapter.isEmpty()) {
             if (!iUITimer.isRunning()) {
@@ -224,8 +224,8 @@ public class ScanActivity extends AppCompatActivity
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-        if (DeviceListCache.getInstance().hasChecked()) {
-            DeviceListCache.getInstance().clearChecked();
+        if (DevicesCache.getInstance().hasChecked()) {
+            DevicesCache.getInstance().clearChecked();
         }
 
         DeviceDisplay mDeviceDisplay = listAdapter.getItem(position);

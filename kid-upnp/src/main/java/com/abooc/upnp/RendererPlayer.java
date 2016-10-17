@@ -2,6 +2,8 @@ package com.abooc.upnp;
 
 import android.util.Log;
 
+import com.abooc.upnp.extra.OnGotMediaInfoCallback;
+import com.abooc.upnp.extra.OnRendererListener;
 import com.abooc.util.Debug;
 
 import org.fourthline.cling.controlpoint.ActionCallback;
@@ -23,17 +25,25 @@ import org.fourthline.cling.support.model.TransportState;
 import org.fourthline.cling.support.renderingcontrol.callback.SetMute;
 
 /**
+ * 远端媒体播放器
+ * <p>
  * Created by author:李瑞宇
  * email:allnet@live.cn
  * on 16/7/12.
  */
-public class RendererPlayer implements Runnable, Player, Renderer.OnSendListener {
+public class RendererPlayer implements Runnable, Player, Renderer.OnActionListener {
 
     private static final RendererPlayer mOur = new RendererPlayer();
     private Renderer iRenderer;
     private Thread iThread;
 
     private PlayerInfo mPlayerInfo;
+
+    private OnGotMediaInfoCallback mOnGotMediaInfoCallback;
+
+    public void addOnGotMediaInfoCallback(OnGotMediaInfoCallback callback) {
+        mOnGotMediaInfoCallback = callback;
+    }
 
     private RendererPlayer() {
     }
@@ -60,10 +70,10 @@ public class RendererPlayer implements Runnable, Player, Renderer.OnSendListener
         return iRenderer.getRenderingControlService();
     }
 
-    private Renderer.OnSendListener iTempOnSendListener;
+    private Renderer.OnActionListener iTempOnActionListener;
 
-    public void addCallback(Renderer.OnSendListener listener) {
-        iTempOnSendListener = listener;
+    public void addCallback(Renderer.OnActionListener listener) {
+        iTempOnActionListener = listener;
     }
 
     private void execute(final ActionCallback actionCallback) {
@@ -287,17 +297,17 @@ public class RendererPlayer implements Runnable, Player, Renderer.OnSendListener
     @Override
     public void onSend() {
         iRenderer.setSending(true);
-        if (iTempOnSendListener != null) {
-            iTempOnSendListener.onSend();
+        if (iTempOnActionListener != null) {
+            iTempOnActionListener.onSend();
         }
     }
 
     @Override
     public void onSendFinish(boolean success) {
         iRenderer.setSending(false);
-        if (iTempOnSendListener != null) {
-            iTempOnSendListener.onSendFinish(success);
-            iTempOnSendListener = null;
+        if (iTempOnActionListener != null) {
+            iTempOnActionListener.onSendFinish(success);
+            iTempOnActionListener = null;
         }
     }
 
@@ -317,13 +327,6 @@ public class RendererPlayer implements Runnable, Player, Renderer.OnSendListener
             iThread.interrupt();
         iThread = null;
         Debug.anchor();
-    }
-
-
-    private OnGotMediaInfoCallback mOnGotMediaInfoCallback;
-
-    public void addOnGotMediaInfoCallback(OnGotMediaInfoCallback callback) {
-        mOnGotMediaInfoCallback = callback;
     }
 
     /**
