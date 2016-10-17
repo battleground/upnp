@@ -15,7 +15,6 @@ import com.abooc.upnp.DeviceDisplay;
 import com.abooc.upnp.DeviceListCache;
 import com.abooc.upnp.OnGotMediaInfoCallback;
 import com.abooc.upnp.OnRendererListener;
-import com.abooc.upnp.PlayerInfo;
 import com.abooc.upnp.Renderer;
 import com.abooc.upnp.RendererPlayer;
 
@@ -27,9 +26,6 @@ import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.TransportState;
 import org.fourthline.cling.support.model.item.Item;
 
-import java.util.Observable;
-import java.util.Observer;
-
 import demo.abooc.com.upnp.AppTestResources;
 import demo.abooc.com.upnp.R;
 import demo.abooc.com.upnp.UPnP;
@@ -39,7 +35,7 @@ import demo.abooc.com.upnp.model.VRVideoItem;
  * 播放控制页
  */
 public class PlayerActivity extends AppCompatActivity
-        implements View.OnClickListener, Observer {
+        implements View.OnClickListener {
 
     public static void launch(Context context) {
         Intent intent = new Intent(context, PlayerActivity.class);
@@ -189,6 +185,10 @@ public class PlayerActivity extends AppCompatActivity
                 mRendererPlayer.pause();
                 mVideoPlayerView.setState(TransportState.PAUSED_PLAYBACK);
                 break;
+            case R.id.Stop:
+                mRendererPlayer.stop();
+                mVideoPlayerView.setState(TransportState.STOPPED);
+                break;
             case R.id.VolumeMute:
                 boolean mute = !mRenderer.getPlayerInfo().isMute();
                 mRenderer.setMute(mute);
@@ -254,8 +254,9 @@ public class PlayerActivity extends AppCompatActivity
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-                long volume1 = mRenderer.getPlayerInfo().getVolume();
-                mRenderer.volume(Math.min(100, volume1 + 10));
+                long volume1 = mRenderer.getPlayerInfo().getVolume() + 10;
+                mRenderer.volume(Math.min(100, volume1));
+                mVideoPlayerView.setVolume(volume1);
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 long volume2 = mRenderer.getPlayerInfo().getVolume();
@@ -267,33 +268,15 @@ public class PlayerActivity extends AppCompatActivity
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    public void update(Observable observable, Object data) {
-        PlayerInfo playerInfo = mRenderer.getPlayerInfo();
-
-        TransportState playState = playerInfo.getTransportState();
-        long volume = playerInfo.getVolume();
-        boolean mute = playerInfo.isMute();
-
-        updateStateMessage(playState);
-        mVideoPlayerView.setState(playState);
-        mVideoPlayerView.setVolume((int) volume);
-        mVideoPlayerView.seekVolume((int) volume);
-        mVideoPlayerView.setMute(mute);
-
-        MediaInfo mediaInfo = playerInfo.getMediaInfo();
-        if (mediaInfo != null) {
-            setMediaInfo(mediaInfo);
-        }
-    }
-
     private void setMediaInfo(MediaInfo mediaInfo) {
         String currentURIMetaData = mediaInfo.getCurrentURIMetaData();
         AVTransportVariable.CurrentTrackMetaData trackMetaData = new AVTransportVariable.CurrentTrackMetaData(currentURIMetaData);
         mTextUri.setText(trackMetaData.getName() + ", " + mediaInfo.getCurrentURI());
 
         Item item = UPnP.parseCurrentURIMetaData(mediaInfo.getCurrentURIMetaData());
-        getSupportActionBar().setTitle(item.getTitle());
+        if (item != null) {
+            getSupportActionBar().setTitle(item.getTitle());
+        }
     }
 
     private void updateStateMessage(TransportState state) {

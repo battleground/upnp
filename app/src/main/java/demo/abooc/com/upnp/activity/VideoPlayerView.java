@@ -118,11 +118,11 @@ public class VideoPlayerView {
         mVolumeMute.setImageResource(mute ? R.drawable.ic_action_volume_muted : R.drawable.ic_action_volume_on);
     }
 
-    public void setVolume(int volume) {
+    public void setVolume(long volume) {
         mVolumeValue.setText("" + volume);
     }
 
-    public void seekVolume(int volume) {
-        mSeekBarVolume.setProgress(volume);
+    public void seekVolume(long volume) {
+        mSeekBarVolume.setProgress((int) volume);
     }
 }

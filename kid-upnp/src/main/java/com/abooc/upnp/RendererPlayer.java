@@ -215,19 +215,7 @@ public class RendererPlayer implements Runnable, Player, Renderer.OnSendListener
         execute(new GetPositionInfo(getAVTransportService()) {
             @Override
             public void received(ActionInvocation invocation, PositionInfo positionInfo) {
-
                 mOnRendererListener.onRemoteProgressChanged(positionInfo);
-
-                if (mPlayerInfo.isTransitioning()) {
-                    long diff = Math.abs(positionInfo.getTrackElapsedSeconds() - mPlayerInfo.getPositionInfo().getTrackElapsedSeconds());
-                    if (diff <= 2) {
-                        onSendFinish(true);
-                        mPlayerInfo.setPositionInfo(positionInfo);
-                    }
-                } else {
-                    onSendFinish(true);
-                    mPlayerInfo.setPositionInfo(positionInfo);
-                }
             }
 
             @Override

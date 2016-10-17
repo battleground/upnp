@@ -102,5 +102,12 @@
             android:textColor="@android:color/primary_text_dark"
             android:textSize="10sp" />
 
+        <ImageView
+            android:id="@+id/Stop"
+            android:layout_width="30dip"
+            android:layout_height="30dip"
+            android:src="@drawable/stop"
+            android:text="Stop" />
+
     </LinearLayout>
 </FrameLayout>

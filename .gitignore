@@ -7,3 +7,10 @@
 /build
 /captures
 .externalNativeBuild
+/.idea/
+.idea/
+app/libs/
+app/src/androidTest/
+gradle/
+kid-upnp/libs/
+kid-upnp/src/main/res/
