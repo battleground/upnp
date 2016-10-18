@@ -12,7 +12,6 @@ import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.Service;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.support.renderingcontrol.callback.GetMute;
-import org.fourthline.cling.support.renderingcontrol.callback.GetVolume;
 import org.fourthline.cling.support.renderingcontrol.callback.SetMute;
 import org.fourthline.cling.support.renderingcontrol.callback.SetVolume;
 
@@ -90,13 +89,13 @@ public class Renderer {
     }
 
 
-    public void volume(final long volume) {
+    public void setVolume(final long volume) {
         if (!isRenderingControl()) return;
         Debug.anchor(volume);
         execute(new SetVolume(getRenderingControlService(), volume) {
             @Override
             public void success(ActionInvocation invocation) {
-                mPlayerInfo.setVolume(volume);
+                mPlayerInfo.updateVolume(volume);
 
                 isSending = false;
                 if (iOnActionListener != null) {
@@ -113,36 +112,12 @@ public class Renderer {
         });
     }
 
-    public void getVolume() {
-        if (!isRenderingControl()) return;
-        execute(new GetVolume(getRenderingControlService()) {
-            @Override
-            public void received(ActionInvocation invocation, int volume) {
-                Debug.anchor(volume);
-                mPlayerInfo.setVolume(volume);
-
-                isSending = false;
-                if (iOnActionListener != null) {
-                    iOnActionListener.onSendFinish(true);
-                }
-            }
-
-            @Override
-            public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
-                if (iOnActionListener != null) {
-                    iOnActionListener.onSendFinish(false);
-                }
-            }
-        });
-
-    }
-
     public void getMute() {
         if (!isRenderingControl()) return;
         execute(new GetMute(getRenderingControlService()) {
             @Override
             public void received(ActionInvocation arg0, boolean arg1) {
-                mPlayerInfo.setMute(arg1);
+                mPlayerInfo.updateMute(arg1);
 
                 isSending = false;
                 if (iOnActionListener != null) {
@@ -151,7 +126,7 @@ public class Renderer {
             }
 
             @Override
-            public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
+            public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
                 if (iOnActionListener != null) {
                     iOnActionListener.onSendFinish(false);
                 }
@@ -165,7 +140,7 @@ public class Renderer {
         execute(new SetMute(getRenderingControlService(), desiredMute) {
             @Override
             public void success(ActionInvocation invocation) {
-                mPlayerInfo.setMute(desiredMute);
+                mPlayerInfo.updateMute(desiredMute);
             }
 
             @Override

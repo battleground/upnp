@@ -215,11 +215,11 @@ public class KidsActivity extends AppCompatActivity
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 long volume1 = mRenderer.getPlayerInfo().getVolume();
-                mRenderer.volume(Math.min(100, volume1 + 10));
+                mRenderer.setVolume(Math.min(100, volume1 + 10));
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 long volume2 = mRenderer.getPlayerInfo().getVolume();
-                mRenderer.volume(Math.max(0, volume2 - 10));
+                mRenderer.setVolume(Math.max(0, volume2 - 10));
                 return true;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
                 break;
@@ -246,7 +246,7 @@ public class KidsActivity extends AppCompatActivity
         PlayerInfo state = mRenderer.getPlayerInfo();
 //        state.setOnProgressUpdateListener(iOnProgressUpdateListener);
         state.addObserver(KidsActivity.this);
-        mRenderer.getVolume();
+//        mRenderer.getVolume();
         mRenderer.getMute();
 
         mPlayer = RendererPlayer.build(mRenderer);
@@ -480,7 +480,7 @@ public class KidsActivity extends AppCompatActivity
                 mPlayer.pause();
                 break;
             case R.id.VolumeMute:
-//                mPlayer.setMute(!getRendererPlayer().getPlayerState().isMute());
+//                mPlayer.updateMute(!getRendererPlayer().getPlayerState().isMute());
                 break;
         }
     }

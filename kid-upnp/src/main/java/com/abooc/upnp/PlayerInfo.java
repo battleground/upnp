@@ -67,7 +67,7 @@ public class PlayerInfo extends Observable implements Info {
         return transportInfo;
     }
 
-    public void setTransportInfo(TransportInfo transportInfo) {
+    public void updateTransportInfo(TransportInfo transportInfo) {
         this.transportInfo = transportInfo;
     }
 
@@ -75,7 +75,7 @@ public class PlayerInfo extends Observable implements Info {
         return positionInfo;
     }
 
-    public void setPositionInfo(PositionInfo positionInfo) {
+    public void updatePositionInfo(PositionInfo positionInfo) {
         this.positionInfo = positionInfo;
     }
 
@@ -87,7 +87,7 @@ public class PlayerInfo extends Observable implements Info {
         return mVolume;
     }
 
-    public void setVolume(long volume) {
+    public void updateVolume(long volume) {
         this.mVolume = volume;
     }
 
@@ -95,7 +95,7 @@ public class PlayerInfo extends Observable implements Info {
         return mediaInfo;
     }
 
-    public void setMediaInfo(MediaInfo mediaInfo) {
+    public void updateMediaInfo(MediaInfo mediaInfo) {
         this.mediaInfo = mediaInfo;
     }
 
@@ -114,11 +114,11 @@ public class PlayerInfo extends Observable implements Info {
         mediaInfo = new MediaInfo();
     }
 
-    public void seek(String progress) {
+    public void updateSeek(String progress) {
         positionInfo.setRelTime(progress.toString());
     }
 
-    public void setMute(boolean mute) {
+    public void updateMute(boolean mute) {
         mMute = mute;
     }
 

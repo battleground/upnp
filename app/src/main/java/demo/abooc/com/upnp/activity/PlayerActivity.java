@@ -16,9 +16,12 @@ import com.abooc.upnp.RendererBuilder;
 import com.abooc.upnp.RendererPlayer;
 import com.abooc.upnp.extra.OnGotMediaInfoCallback;
 import com.abooc.upnp.extra.OnRendererListener;
+import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
 
 import org.fourthline.cling.model.ModelUtil;
+import org.fourthline.cling.model.action.ActionInvocation;
+import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
 import org.fourthline.cling.support.model.MediaInfo;
@@ -26,6 +29,7 @@ import org.fourthline.cling.support.model.PositionInfo;
 import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.TransportState;
 import org.fourthline.cling.support.model.item.Item;
+import org.fourthline.cling.support.renderingcontrol.callback.GetVolume;
 
 import demo.abooc.com.upnp.AppTestResources;
 import demo.abooc.com.upnp.R;
@@ -158,7 +162,25 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer.getPositionInfo();
         mRendererPlayer.getMediaInfo(mMediaInfoCallback);
         mRenderer.getMute();
-        mRenderer.getVolume();
+
+        mRenderer.execute(new GetVolume(mRenderer.getRenderingControlService()) {
+            @Override
+            public void received(ActionInvocation invocation, final int volume) {
+                Debug.anchor(volume);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mVideoPlayerView.setVolume(volume);
+                        mVideoPlayerView.seekVolume(volume);
+                    }
+                });
+            }
+
+            @Override
+            public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
+            }
+        });
+
     }
 
     @Override
@@ -242,7 +264,7 @@ public class PlayerActivity extends AppCompatActivity
             int progress = seekBar.getProgress();
             switch (seekBar.getId()) {
                 case R.id.SeekVolume:
-                    mRenderer.volume(progress);
+                    mRenderer.setVolume(progress);
                     break;
                 case R.id.Seek:
                     String time = ModelUtil.toTimeString(progress);
@@ -259,12 +281,15 @@ public class PlayerActivity extends AppCompatActivity
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 long volume1 = mRenderer.getPlayerInfo().getVolume() + 10;
-                mRenderer.volume(Math.min(100, volume1));
+                mRenderer.setVolume(Math.min(100, volume1));
                 mVideoPlayerView.setVolume(volume1);
+                mVideoPlayerView.seekVolume(volume1);
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-                long volume2 = mRenderer.getPlayerInfo().getVolume();
-                mRenderer.volume(Math.max(0, volume2 - 10));
+                long volume2 = mRenderer.getPlayerInfo().getVolume() - 10;
+                mRenderer.setVolume(Math.max(0, volume2));
+                mVideoPlayerView.setVolume(volume2);
+                mVideoPlayerView.seekVolume(volume2);
                 return true;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
                 break;
@@ -319,7 +344,23 @@ public class PlayerActivity extends AppCompatActivity
     }
 
     public void onGetVolumeEvent(View view) {
-        mRenderer.getVolume();
+        mRenderer.execute(new GetVolume(mRenderer.getRenderingControlService()) {
+            @Override
+            public void received(ActionInvocation invocation, final int volume) {
+                Debug.anchor(volume);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRenderer.getPlayerInfo().updateVolume(volume);
+                        mVideoPlayerView.setVolume(volume);
+                    }
+                });
+            }
+
+            @Override
+            public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
+            }
+        });
     }
 
     public void onGetMediaInfoEvent(View view) {

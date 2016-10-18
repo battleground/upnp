@@ -154,7 +154,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
 
     @Override
     public void volume(final long volume) {
-        iRenderer.volume(volume);
+        iRenderer.setVolume(volume);
     }
 
     @Override
@@ -188,7 +188,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
         execute(new Seek(getAVTransportService(), progress.toString()) {
             @Override
             public void success(ActionInvocation invocation) {
-                mPlayerInfo.seek(progress);
+                mPlayerInfo.updateSeek(progress);
             }
 
             @Override
@@ -207,7 +207,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
             @Override
             public void success(ActionInvocation invocation) {
                 mOnRendererListener.onRemoteMuteChanged(b);
-                mPlayerInfo.setMute(b);
+                mPlayerInfo.updateMute(b);
 
                 onSendFinish(true);
 
@@ -242,7 +242,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
             @Override
             public void received(ActionInvocation invocation, MediaInfo mediaInfo) {
                 callback.onGotMediaInfo(mediaInfo);
-                mPlayerInfo.setMediaInfo(mediaInfo);
+                mPlayerInfo.updateMediaInfo(mediaInfo);
                 onSendFinish(true);
             }
 
@@ -260,7 +260,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
                 TransportState transportState = transportInfo.getCurrentTransportState();
                 handState(transportState);
                 mPlayerInfo.update(transportState);
-                mPlayerInfo.setTransportInfo(transportInfo);
+                mPlayerInfo.updateTransportInfo(transportInfo);
                 onSendFinish(true);
 
             }
