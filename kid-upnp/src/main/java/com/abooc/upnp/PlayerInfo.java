@@ -5,8 +5,6 @@ import org.fourthline.cling.support.model.PositionInfo;
 import org.fourthline.cling.support.model.TransportInfo;
 import org.fourthline.cling.support.model.TransportState;
 
-import java.util.Observable;
-
 
 interface Info {
     boolean isPlaying();
@@ -21,12 +19,12 @@ interface Info {
 
 /**
  * 负责记录远端媒体播放状态、媒体信息、播放进度。
- *
+ * <p>
  * Created by author:李瑞宇
  * email:allnet@live.cn
  * on 16/7/12.
  */
-public class PlayerInfo extends Observable implements Info {
+public class PlayerInfo implements Info {
 
     private long mVolume;
     private boolean mMute = false;

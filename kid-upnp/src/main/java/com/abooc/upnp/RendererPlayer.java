@@ -117,6 +117,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
             @Override
             public void success(ActionInvocation invocation) {
                 mOnRendererListener.onRemotePlaying();
+                mOnRendererListener.onRemoteStateChanged(TransportState.PLAYING);
                 mPlayerInfo.update(TransportState.PLAYING);
                 Debug.anchor("success");
 
@@ -139,6 +140,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
             @Override
             public void success(ActionInvocation invocation) {
                 mOnRendererListener.onRemotePaused();
+                mOnRendererListener.onRemoteStateChanged(TransportState.PAUSED_PLAYBACK);
                 mPlayerInfo.update(TransportState.PAUSED_PLAYBACK);
 
                 onSendFinish(true);
@@ -164,6 +166,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
             @Override
             public void success(ActionInvocation invocation) {
                 mOnRendererListener.onRemoteStopped();
+                mOnRendererListener.onRemoteStateChanged(TransportState.STOPPED);
                 onSendFinish(true);
             }
 

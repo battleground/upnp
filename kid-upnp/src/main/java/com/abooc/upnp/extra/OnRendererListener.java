@@ -1,6 +1,7 @@
 package com.abooc.upnp.extra;
 
 import org.fourthline.cling.support.model.PositionInfo;
+import org.fourthline.cling.support.model.TransportState;
 
 /**
  * Created by author:李瑞宇
@@ -27,6 +28,8 @@ public interface OnRendererListener {
     void onRemoteVolumeChanged(long volume);
 
     void onRemoteMuteChanged(boolean mute);
+
+    void onRemoteStateChanged(TransportState state);
 
 
     class SimpleOnRendererListener implements OnRendererListener {
@@ -73,6 +76,11 @@ public interface OnRendererListener {
 
         @Override
         public void onRemoteMuteChanged(boolean mute) {
+
+        }
+
+        @Override
+        public void onRemoteStateChanged(TransportState state) {
 
         }
     }
