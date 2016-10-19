@@ -31,6 +31,8 @@ public interface OnRendererListener {
 
     void onRemoteStateChanged(TransportState state);
 
+    void onRemotePlayEnd();
+
 
     class SimpleOnRendererListener implements OnRendererListener {
 
@@ -81,6 +83,11 @@ public interface OnRendererListener {
 
         @Override
         public void onRemoteStateChanged(TransportState state) {
+
+        }
+
+        @Override
+        public void onRemotePlayEnd() {
 
         }
     }

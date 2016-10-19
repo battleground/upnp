@@ -123,6 +123,11 @@ public class PlayerActivity extends AppCompatActivity
                         }
                     });
                 }
+
+                @Override
+                public void onRemotePlayEnd() {
+                    Debug.e("播放完毕");
+                }
             };
 
     @Override

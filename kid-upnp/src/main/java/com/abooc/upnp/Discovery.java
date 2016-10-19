@@ -14,7 +14,6 @@ import com.abooc.util.Debug;
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.android.NetworkUtils;
 import org.fourthline.cling.model.message.header.ServiceTypeHeader;
-import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
@@ -160,16 +159,6 @@ public class Discovery extends DefaultRegistryListener {
                             if (!isOn) {
                                 isOn = true;
                                 turnOnRouter();
-
-
-//                                try {
-//                                    InetAddress localIpAddress = IpAddress.getLocalIpAddress(context);
-//                                    Debug.anchor(localIpAddress.toString());
-//
-//                                    MyHttpServer.inetAddress = localIpAddress;
-//                                } catch (UnknownHostException e) {
-//                                    e.printStackTrace();
-//                                }
                             }
                             break;
                         case DISCONNECTED:

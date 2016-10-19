@@ -224,12 +224,25 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
 
     }
 
+    private boolean hasCallEnd = false;
+
     public void getPositionInfo() {
         if (!iRenderer.isAVTransport()) return;
         execute(new GetPositionInfo(getAVTransportService()) {
             @Override
             public void received(ActionInvocation invocation, PositionInfo positionInfo) {
                 mOnRendererListener.onRemoteProgressChanged(positionInfo);
+
+                long duration = positionInfo.getTrackDurationSeconds();
+                long progress = positionInfo.getTrackElapsedSeconds();
+                if ((Math.abs(duration - progress)) <= toleranceSeconds) {
+                    if (!hasCallEnd) {
+                        hasCallEnd = true;
+                        mOnRendererListener.onRemotePlayEnd();
+                    }
+                } else {
+                    hasCallEnd = false;
+                }
             }
 
             @Override
@@ -369,4 +382,14 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
         }
     }
 
+    private static int toleranceSeconds = 2;
+
+    /**
+     * 播放完毕误差值
+     *
+     * @param seconds 单位秒
+     */
+    public static void setEndTolerance(int seconds) {
+        toleranceSeconds = seconds;
+    }
 }
