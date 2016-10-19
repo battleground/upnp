@@ -11,8 +11,8 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.abooc.upnp.DlnaManager;
 import com.abooc.upnp.Renderer;
-import com.abooc.upnp.RendererBuilder;
 import com.abooc.upnp.RendererPlayer;
 import com.abooc.upnp.extra.OnGotMediaInfoCallback;
 import com.abooc.upnp.extra.OnRendererListener;
@@ -64,7 +64,7 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer.startTrack();
         mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
 
-        Device boundDevice = RendererBuilder.get().getBoundDevice();
+        Device boundDevice = DlnaManager.getInstance().getBoundDevice();
         String friendlyName = boundDevice.getDetails().getFriendlyName();
         getSupportActionBar().setSubtitle("连接设备：" + friendlyName);
 
@@ -135,7 +135,7 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer = RendererPlayer.build(mRenderer);
         mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
 
-        Device boundDevice = RendererBuilder.get().getBoundDevice();
+        Device boundDevice = DlnaManager.getInstance().getBoundDevice();
         String friendlyName = boundDevice.getDetails().getFriendlyName();
         getSupportActionBar().setSubtitle("连接设备：" + friendlyName);
     }

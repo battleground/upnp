@@ -1,26 +1,28 @@
 package com.abooc.upnp;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.IBinder;
 
+import com.abooc.upnp.model.CDevice;
+import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.util.Debug;
 
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.android.NetworkUtils;
+import org.fourthline.cling.model.message.header.ServiceTypeHeader;
+import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.RemoteDevice;
+import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
 import org.fourthline.cling.transport.Router;
 import org.fourthline.cling.transport.RouterException;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -28,136 +30,174 @@ import java.util.Collection;
  * email:allnet@live.cn
  * on 16/7/14.
  */
-public class Discovery {
+public class Discovery extends DefaultRegistryListener {
 
     protected AndroidUpnpService mUPnPService;
 
-    protected ServiceConnection UPnPServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mUPnPService = (AndroidUpnpService) service;
-            mUPnPService.getRegistry().addListener(registryListener);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName className) {
-            mUPnPService.getRegistry().removeAllRemoteDevices();
-            mUPnPService.getRegistry().removeListener(registryListener);
-            mUPnPService = null;
-        }
-
-    };
+    private UPnPServiceConnectionReceiver mUPnPServiceReceiver;
+    private WiFi mWiFi = new WiFi();
 
     private static Discovery mOur = new Discovery();
 
-    private WifiReceiver iWifiReceiver;
-    private Context mContext;
-
     private Discovery() {
-        iWifiReceiver = new WifiReceiver();
+        mUPnPServiceReceiver = new UPnPServiceConnectionReceiver();
     }
 
     public static Discovery get() {
         return mOur;
     }
 
-    public void bindServer(Context context) {
-        mContext = context;
-        context.bindService(new Intent(context, AppAndroidUPnPService.class), UPnPServiceConnection, Context.BIND_AUTO_CREATE);
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        context.registerReceiver(iWifiReceiver, intentFilter);
+    public AndroidUpnpService getUpnpService() {
+        return mUPnPService;
     }
 
-    public void unbindServer(Context context) {
+    private class UPnPServiceConnectionReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mUPnPService = DlnaManager.getInstance().getUpnpService();
+            switch (intent.getAction()) {
+                case DlnaManager.ACTION_DLNA_CONNECTION_CONNECTED:
+                    mUPnPService.getRegistry().addListener(Discovery.this);
+
+                    search();
+                    break;
+                case DlnaManager.ACTION_DLNA_CONNECTION_DISCONNECTED:
+                    mUPnPService.getRegistry().removeListener(Discovery.this);
+                    mUPnPService.getRegistry().removeAllRemoteDevices();
+                    break;
+            }
+        }
+    }
+
+    public void init(Context context) {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(DlnaManager.ACTION_DLNA_CONNECTION_CONNECTED);
+        intentFilter.addAction(DlnaManager.ACTION_DLNA_CONNECTION_DISCONNECTED);
+        Context applicationContext = context.getApplicationContext();
+        applicationContext.registerReceiver(mUPnPServiceReceiver, intentFilter);
+
+        IntentFilter wifiFilter = new IntentFilter();
+        wifiFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        applicationContext.registerReceiver(mWiFi, wifiFilter);
+    }
+
+    public void exit(Context context) {
         try {
-            context.unbindService(UPnPServiceConnection);
-            mContext.unregisterReceiver(iWifiReceiver);
+            Context applicationContext = context.getApplicationContext();
+            applicationContext.unregisterReceiver(mUPnPServiceReceiver);
+            applicationContext.unregisterReceiver(mWiFi);
         } catch (Exception e) {
 
         }
     }
 
-    public AndroidUpnpService getUpnpService() {
-        return mUPnPService;
+    public void removeAll() {
+        if (mUPnPService != null) {
+            mUPnPService.getRegistry().removeAllRemoteDevices();
+        }
     }
 
-    public void removeAll() {
-        mUPnPService.getRegistry().removeAllRemoteDevices();
+    public ArrayList<DeviceDisplay> getList() {
+        if (mUPnPService != null) {
+            Collection<RemoteDevice> devices = mUPnPService.getRegistry().getRemoteDevices();
+            ArrayList<DeviceDisplay> list = new ArrayList<>();
+            for (RemoteDevice device : devices) {
+                DeviceDisplay display = new DeviceDisplay(new CDevice(device));
+                list.add(display);
+            }
+            return list;
+        }
+        return null;
     }
 
     public void search() {
-        Collection<RemoteDevice> devices = mUPnPService.getRegistry().getRemoteDevices();
-        for (RemoteDevice device : devices) {
-            registryListener.remoteDeviceAdded(mUPnPService.getRegistry(), device);
+        if (mUPnPService != null) {
+            Collection<RemoteDevice> devices = mUPnPService.getRegistry().getRemoteDevices();
+            for (RemoteDevice device : devices) {
+                remoteDeviceAdded(mUPnPService.getRegistry(), device);
+            }
+
+            mUPnPService.getControlPoint().search(new ServiceTypeHeader(iUDAServiceType));
         }
-        mUPnPService.getControlPoint().search();
     }
+
+    private UDAServiceType iUDAServiceType = new UDAServiceType("AVTransport");
 
     public void addDefaultRegistryListener(DefaultRegistryListener listener) {
         mDefaultRegistryListener = listener;
     }
 
-    private DefaultRegistryListener mDefaultRegistryListener = new DefaultRegistryListener();
+    private DefaultRegistryListener mDefaultRegistryListener;
 
-    private DefaultRegistryListener registryListener = new DefaultRegistryListener() {
-
-        @Override
-        public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-            super.remoteDeviceAdded(registry, device);
-            if (mDefaultRegistryListener != null) {
-                mDefaultRegistryListener.remoteDeviceAdded(registry, device);
-            }
+    @Override
+    public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+        super.remoteDeviceAdded(registry, device);
+        if (mDefaultRegistryListener != null) {
+            mDefaultRegistryListener.remoteDeviceAdded(registry, device);
         }
+    }
 
-        @Override
-        public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
-            super.remoteDeviceRemoved(registry, device);
-            if (mDefaultRegistryListener != null) {
-                mDefaultRegistryListener.remoteDeviceRemoved(registry, device);
-            }
+    @Override
+    public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
+        super.remoteDeviceRemoved(registry, device);
+        if (mDefaultRegistryListener != null) {
+            mDefaultRegistryListener.remoteDeviceRemoved(registry, device);
         }
-    };
+    }
 
-    private class WifiReceiver extends BroadcastReceiver {
+    private class WiFi extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Debug.anchor(intent.toString());
             if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
                 NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 boolean isWifi = NetworkUtils.isWifi(networkInfo);
-                if (isWifi && networkInfo.isAvailable() && mUPnPService != null) {
+                if (isWifi && networkInfo.isAvailable()) {
                     switch (networkInfo.getState()) {
                         case CONNECTED:
-                            turnOnRouter();
+                            if (!isOn) {
+                                isOn = true;
+                                turnOnRouter();
+
+
+//                                try {
+//                                    InetAddress localIpAddress = IpAddress.getLocalIpAddress(context);
+//                                    Debug.anchor(localIpAddress.toString());
+//
+//                                    MyHttpServer.inetAddress = localIpAddress;
+//                                } catch (UnknownHostException e) {
+//                                    e.printStackTrace();
+//                                }
+                            }
                             break;
                         case DISCONNECTED:
-                            removeAll();
-                            turnOffRouter();
+                            if (isOn) {
+                                isOn = false;
+                                removeAll();
+                                turnOffRouter();
+                            }
                             break;
                     }
                 }
-
             }
-        }
-
-        boolean isWifiEnable(WifiInfo wifiInfo) {
-            return wifiInfo.getNetworkId() > 0
-                    && wifiInfo.getLinkSpeed() > 0;
         }
     }
 
+    private boolean isOn = true;
 
-    private void turnOnRouter() {
+
+    public static void turnOnRouter() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Router router = mUPnPService.get().getRouter();
-                    Debug.anchor("enable");
-                    router.enable();
+                    Router router = DlnaManager.getInstance().getBindRouter();
+                    if (router != null) {
+                        Debug.anchor("enable");
+                        router.enable();
+                    }
                 } catch (RouterException e) {
                     Debug.e(e.getMessage());
                 }
@@ -165,19 +205,22 @@ public class Discovery {
         }).start();
     }
 
-    private void turnOffRouter() {
+    public static void turnOffRouter() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    Router router = mUPnPService.get().getRouter();
-                    Debug.anchor("disable");
-                    router.disable();
+                    Router router = DlnaManager.getInstance().getBindRouter();
+                    if (router != null) {
+                        Debug.anchor("disable");
+                        router.disable();
+                    }
                 } catch (RouterException e) {
                     Debug.e(e.getMessage());
                 }
             }
         }).start();
     }
+
 
 }

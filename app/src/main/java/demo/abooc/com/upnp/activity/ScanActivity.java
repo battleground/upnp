@@ -17,18 +17,17 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.abooc.upnp.Discovery;
-import com.abooc.upnp.Renderer;
-import com.abooc.upnp.RendererBuilder;
+import com.abooc.upnp.DlnaManager;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
 
-import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.android.NetworkUtils;
 import org.fourthline.cling.model.message.header.DeviceTypeHeader;
 import org.fourthline.cling.model.message.header.STAllHeader;
 import org.fourthline.cling.model.message.header.ServiceTypeHeader;
+import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.types.DeviceType;
 import org.fourthline.cling.model.types.UDAServiceType;
@@ -55,7 +54,7 @@ public class ScanActivity extends AppCompatActivity
     private Discovery mDiscovery;
     private ListView mListView;
     private TextView mEmptyView;
-    private DevicesListAdapter listAdapter;
+    private DevicesListAdapter mListAdapter;
     private WiFiReceiver iWiFiReceiver;
 
     @Override
@@ -73,11 +72,17 @@ public class ScanActivity extends AppCompatActivity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        DeviceDisplay deviceDisplay = new DeviceDisplay(new CDevice(device));
+                        CDevice cDevice = new CDevice(device);
+                        if (cDevice.asService("AVTransport")) {
+                            DeviceDisplay deviceDisplay = new DeviceDisplay(cDevice);
+                            mListAdapter.add(deviceDisplay);
+                            getSupportActionBar().setTitle("扫描设备...，已发现" + mListAdapter.getCount() + "个");
 
-                        listAdapter.add(deviceDisplay);
-
-                        getSupportActionBar().setTitle("扫描设备...，已发现" + listAdapter.getCount() + "个");
+                            Device boundDevice = DlnaManager.getInstance().getBoundDevice();
+                            if (device.equals(boundDevice)) {
+                                deviceDisplay.setChecked(true);
+                            }
+                        }
                     }
                 });
             }
@@ -89,13 +94,13 @@ public class ScanActivity extends AppCompatActivity
                     public void run() {
                         DeviceDisplay deviceDisplay = new DeviceDisplay(new CDevice(device));
 
-                        listAdapter.remove(deviceDisplay);
-                        if (listAdapter.isEmpty()) {
+                        mListAdapter.remove(deviceDisplay);
+                        if (mListAdapter.isEmpty()) {
                             if (!iUITimer.isRunning()) {
                                 mEmptyView.setText("没有可用的设备");
                             }
                         }
-                        getSupportActionBar().setTitle("扫描设备...，已发现" + listAdapter.getCount() + "个");
+                        getSupportActionBar().setTitle("扫描设备...，已发现" + mListAdapter.getCount() + "个");
                     }
                 });
             }
@@ -113,9 +118,8 @@ public class ScanActivity extends AppCompatActivity
         mListView = (ListView) findViewById(android.R.id.list);
         mListView.setEmptyView(mEmptyView);
         mListView.setOnItemClickListener(this);
-        listAdapter = new DevicesListAdapter(this);
-        mListView.setAdapter(listAdapter);
-
+        mListAdapter = new DevicesListAdapter(this);
+        mListView.setAdapter(mListAdapter);
     }
 
     private void setSubtitle(String subtitle) {
@@ -133,8 +137,7 @@ public class ScanActivity extends AppCompatActivity
             @Override
             public void run() {
                 try {
-                    AndroidUpnpService upnpService = mDiscovery.getUpnpService();
-                    Router router = upnpService.get().getRouter();
+                    Router router = DlnaManager.getInstance().getBindRouter();
                     if (router.isEnabled()) {
                         Toast.show("关闭");
                         Debug.anchor("disable");
@@ -177,7 +180,7 @@ public class ScanActivity extends AppCompatActivity
 //                    DeviceType type = new DeviceType("schemas-upnp-org", "MediaServer", 1);
 //                    Discovery.get().getUpnpService().getControlPoint().search(new DeviceTypeHeader(type));
                     UDAServiceType type = new UDAServiceType("ContentDirectory", 1);
-                    Discovery.get().getUpnpService().getControlPoint().search(new ServiceTypeHeader(type));
+                    DlnaManager.getInstance().getUpnpService().getControlPoint().search(new ServiceTypeHeader(type));
                 }
                 break;
             case R.id.menu_deviceType:
@@ -186,7 +189,7 @@ public class ScanActivity extends AppCompatActivity
                 } else {
                     iUITimer.start();
                     DeviceType type = new DeviceType("schemas-upnp-org", "MediaRenderer", 1);
-                    Discovery.get().getUpnpService().getControlPoint().search(new DeviceTypeHeader(type));
+                    DlnaManager.getInstance().getUpnpService().getControlPoint().search(new DeviceTypeHeader(type));
                 }
                 break;
             case R.id.menu_all:
@@ -195,11 +198,17 @@ public class ScanActivity extends AppCompatActivity
                 } else {
                     iUITimer.start();
 
-                    Discovery.get().getUpnpService().getControlPoint().search(new STAllHeader());
+                    DlnaManager.getInstance().getUpnpService().getControlPoint().search(new STAllHeader());
                 }
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mDiscovery.search();
     }
 
     @Override
@@ -214,7 +223,7 @@ public class ScanActivity extends AppCompatActivity
             mEmptyView.setText("扫描中...");
 
             Discovery.get().removeAll();
-            Discovery.get().getUpnpService().getControlPoint().search();
+            DlnaManager.getInstance().getUpnpService().getControlPoint().search();
         }
 
         @Override
@@ -225,24 +234,24 @@ public class ScanActivity extends AppCompatActivity
         @Override
         public void onFinish() {
             Debug.anchor();
-            if (listAdapter.isEmpty()) {
+            if (mListAdapter.isEmpty()) {
                 mEmptyView.setText("未找到可用的设备");
             } else {
-                listAdapter.notifyDataSetChanged();
+                mListAdapter.notifyDataSetChanged();
             }
         }
     };
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-
-        DeviceDisplay mDeviceDisplay = listAdapter.getItem(position);
+        DeviceDisplay mDeviceDisplay = mListAdapter.getItem(position);
         mDeviceDisplay.setChecked(true);
         setTitle(mDeviceDisplay.getDevice().getFriendlyName());
-        CDevice cDevice = (CDevice) mDeviceDisplay.getDevice();
-        Renderer.build(mDiscovery.getUpnpService().getControlPoint(), cDevice);
 
-        RendererBuilder.get().bind(mDiscovery.getUpnpService(), cDevice.getDevice(), null);
+        CDevice cDevice = (CDevice) mDeviceDisplay.getDevice();
+        Device device = cDevice.getDevice();
+        DlnaManager.getInstance().bind(device, null);
+
         PlayerActivity.launch(this);
         finish();
     }

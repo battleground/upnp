@@ -21,6 +21,8 @@ package com.abooc.upnp.model;
 
 import android.widget.Checkable;
 
+import org.fourthline.cling.model.meta.Device;
+
 public class DeviceDisplay implements Checkable {
 
     private final IUPnPDevice device;
@@ -38,6 +40,10 @@ public class DeviceDisplay implements Checkable {
 
     public IUPnPDevice getDevice() {
         return device;
+    }
+
+    public Device getOriginDevice() {
+        return ((CDevice) getDevice()).getDevice();
     }
 
     @Override

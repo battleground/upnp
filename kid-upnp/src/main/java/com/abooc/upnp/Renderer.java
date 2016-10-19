@@ -1,7 +1,6 @@
 package com.abooc.upnp;
 
 import com.abooc.upnp.extra.OnActionListener;
-import com.abooc.upnp.model.CDevice;
 import com.abooc.util.Debug;
 
 import org.fourthline.cling.controlpoint.ActionCallback;
@@ -31,14 +30,14 @@ public class Renderer {
     private Device mDevice;
 
 
-    private Renderer(ControlPoint controlPoint, CDevice device) {
+    private Renderer(ControlPoint controlPoint, Device device) {
         Debug.debug();
         mPlayerInfo = new PlayerInfo();
         mControlPoint = controlPoint;
-        mDevice = device.getDevice();
+        mDevice = device;
     }
 
-    public static Renderer build(ControlPoint controlPoint, CDevice device) {
+    public static Renderer build(ControlPoint controlPoint, Device device) {
         return mOur = new Renderer(controlPoint, device);
     }
 

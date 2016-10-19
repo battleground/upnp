@@ -1,4 +1,10 @@
-package com.abooc.upnp;
+package com.abooc.upnp;//package com.baofeng.fengmi.dlna;
+
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 
 import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
@@ -11,51 +17,132 @@ import org.fourthline.cling.model.gena.RemoteGENASubscription;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.DeviceIdentity;
+import org.fourthline.cling.model.meta.RemoteDeviceIdentity;
 import org.fourthline.cling.model.meta.Service;
 import org.fourthline.cling.model.state.StateVariableValue;
-import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportLastChangeParser;
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
 import org.fourthline.cling.support.lastchange.LastChange;
 import org.fourthline.cling.support.model.TransportState;
+import org.fourthline.cling.transport.Router;
 
 import java.util.Map;
 
 /**
- * 负责绑定远端设备，订阅远端播放状态事件通知
- * <p>
  * Created by author:李瑞宇
  * email:allnet@live.cn
- * on 16/10/13.
+ * on 16/9/1.
  */
+public class DlnaManager {
 
-public class RendererBuilder {
+    public static final String ACTION_DLNA_CONNECTION_CONNECTED = "action.dlna.connection.connected";
+    public static final String ACTION_DLNA_CONNECTION_DISCONNECTED = "action.dlna.connection.disconnected";
 
-    private Device mBoundDevice;
-    private DeviceIdentity mIdentity;
-    private String mBindSubscriptionId;
+    protected ServiceConnection UPnPServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            mUpnpService = (AndroidUpnpService) service;
+
+            Intent intent = new Intent(ACTION_DLNA_CONNECTION_CONNECTED);
+            mContext.sendBroadcast(intent);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName className) {
+            mUpnpService = null;
+            Intent intent = new Intent(ACTION_DLNA_CONNECTION_DISCONNECTED);
+            mContext.sendBroadcast(intent);
+        }
+
+    };
+
     private AndroidUpnpService mUpnpService;
-
-    private static RendererBuilder mOur = new RendererBuilder();
-
-    private RendererBuilder() {
-
-    }
-
-    public static RendererBuilder get() {
-        return mOur;
-    }
-
-    public void bind(AndroidUpnpService upnpService, Device device, SimpleSubscriptionCallback callback) {
-        mUpnpService = upnpService;
-        mBoundDevice = device;
-        mIdentity = device.getIdentity();
-        mSimpleSubscriptionCallback = callback;
-
-        SubscriptionCallback(upnpService);
-    }
+    private Device mBoundDevice;
+    private String mBindSubscriptionId;
+    private String mHost;
+    private DeviceIdentity iDeviceIdentity;
 
     private boolean hasBound;
+
+
+    private static DlnaManager ourInstance = new DlnaManager();
+
+    public static DlnaManager getInstance() {
+        return ourInstance;
+    }
+
+    private DlnaManager() {
+    }
+
+    private Context mContext;
+
+    public void startService(Context context) {
+        mContext = context.getApplicationContext();
+        Intent intent = new Intent(mContext, AppAndroidUPnPService.class);
+        mContext.bindService(intent, UPnPServiceConnection, android.app.Service.BIND_AUTO_CREATE);
+    }
+
+    public void stop() {
+        mContext.unbindService(UPnPServiceConnection);
+        unbound();
+    }
+
+    public boolean isOk() {
+        return mUpnpService != null;
+    }
+
+    public AndroidUpnpService getUpnpService() {
+        return mUpnpService;
+    }
+
+    public Router getBindRouter() {
+        if (isOk()) {
+            return mUpnpService.get().getRouter();
+        }
+        return null;
+    }
+
+    public boolean bind(Device device, SimpleSubscriptionCallback callback) {
+        if (isOk()) {
+
+            mBoundDevice = device;
+            iDeviceIdentity = device.getIdentity();
+            mHost = ((RemoteDeviceIdentity) iDeviceIdentity).getDescriptorURL().getHost();
+            mSimpleSubscriptionCallback = callback;
+
+            Renderer build = Renderer.build(mUpnpService.getControlPoint(), device);
+            Service avTransportService = build.getAVTransportService();
+            SubscriptionCallback subscriptionEvent = createSubscriptionEvent(avTransportService);
+            mUpnpService.getControlPoint().execute(subscriptionEvent);
+            return true;
+        }
+        return false;
+    }
+
+    public void unbound() {
+        if (mBoundDevice != null
+                && mBoundDevice.getIdentity().equals(iDeviceIdentity)) {
+            mBoundDevice = null;
+            iDeviceIdentity = null;
+            mBindSubscriptionId = null;
+            mHost = null;
+            hasBound = false;
+
+            RemoteGENASubscription remoteSubscription = mUpnpService.getRegistry().getRemoteSubscription(mBindSubscriptionId);
+            if (remoteSubscription != null) {
+                mUpnpService.getRegistry().removeRemoteSubscription(remoteSubscription);
+            }
+        }
+    }
+
+    public String getBoundIp() {
+        return mHost;
+    }
+
+    public DeviceIdentity getBoundIdentity() {
+        return iDeviceIdentity;
+    }
 
     public boolean hasBound() {
         return hasBound;
@@ -66,19 +153,8 @@ public class RendererBuilder {
     }
 
     public boolean isBound(Device device) {
-        return device.getIdentity().equals(mIdentity);
+        return device.getIdentity().equals(iDeviceIdentity);
     }
-
-    public void unbind(AndroidUpnpService upnpService, Device device) {
-        if (device.getIdentity().equals(mIdentity)) {
-            mIdentity = null;
-            RemoteGENASubscription remoteSubscription = upnpService.getRegistry().getRemoteSubscription(mBindSubscriptionId);
-            if (remoteSubscription != null) {
-                upnpService.getRegistry().removeRemoteSubscription(remoteSubscription);
-            }
-        }
-    }
-
 
     private SimpleSubscriptionCallback mSimpleSubscriptionCallback;
 
@@ -112,11 +188,8 @@ public class RendererBuilder {
 
     }
 
-    private void SubscriptionCallback(AndroidUpnpService upnpService) {
-        UDAServiceType serviceType = new UDAServiceType("AVTransport");
-        Service avTransport = mBoundDevice.findService(serviceType);
-
-        SubscriptionCallback subscription = new SubscriptionCallback(avTransport) {
+    private SubscriptionCallback createSubscriptionEvent(Service avTransport) {
+        return new SubscriptionCallback(avTransport) {
 
             @Override
             public void established(GENASubscription sub) {
@@ -183,7 +256,6 @@ public class RendererBuilder {
                 Debug.anchor("Missed events: " + numberOfMissedEvents);
             }
         };
-
-        upnpService.getControlPoint().execute(subscription);
     }
+
 }

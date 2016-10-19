@@ -14,6 +14,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.abooc.upnp.Discovery;
+import com.abooc.upnp.DlnaManager;
 import com.abooc.upnp.Player;
 import com.abooc.upnp.PlayerInfo;
 import com.abooc.upnp.Renderer;
@@ -29,6 +30,7 @@ import org.fourthline.cling.model.ModelUtil;
 import org.fourthline.cling.model.gena.CancelReason;
 import org.fourthline.cling.model.gena.GENASubscription;
 import org.fourthline.cling.model.message.UpnpResponse;
+import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.state.StateVariableValue;
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportLastChangeParser;
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
@@ -92,7 +94,6 @@ public class KidsActivity extends AppCompatActivity
 
 
         mDiscovery = Discovery.get();
-        mDiscovery.bindServer(this);
 
 //        mDiscovery.addObserver(new Observer() {
 //            @Override
@@ -203,7 +204,7 @@ public class KidsActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
 
-        mDiscovery.unbindServer(this);
+//        mDiscovery.unbindServer(this);
 
         if (mPlayer != null) {
             getRendererPlayer().stopTrack();
@@ -241,11 +242,13 @@ public class KidsActivity extends AppCompatActivity
         setTitle(mDeviceDisplay.getDevice().getFriendlyName());
         mVideoPlayer.attachRouterEvent(KidsActivity.this, iOnSeekBarChangeListener);
 
-        mRenderer = Renderer.build(mDiscovery.getUpnpService().getControlPoint(), (CDevice) mDeviceDisplay.getDevice());
+        Device device = ((CDevice) mDeviceDisplay.getDevice()).getDevice();
+        DlnaManager.getInstance().bind(device, null);
+        mRenderer = Renderer.get();
 
         PlayerInfo state = mRenderer.getPlayerInfo();
 //        state.setOnProgressUpdateListener(iOnProgressUpdateListener);
-        state.addObserver(KidsActivity.this);
+//        state.addObserver(KidsActivity.this);
 //        mRenderer.getVolume();
         mRenderer.getMute();
 

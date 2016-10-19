@@ -285,12 +285,15 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
                 break;
             case PLAYING:
                 mOnRendererListener.onRemotePlaying();
+                mOnRendererListener.onRemoteStateChanged(TransportState.PLAYING);
                 break;
             case PAUSED_PLAYBACK:
                 mOnRendererListener.onRemotePaused();
+                mOnRendererListener.onRemoteStateChanged(TransportState.PAUSED_PLAYBACK);
                 break;
             case STOPPED:
                 mOnRendererListener.onRemoteStopped();
+                mOnRendererListener.onRemoteStateChanged(TransportState.STOPPED);
                 break;
             case TRANSITIONING:
                 mOnRendererListener.onRemoteSeeking();

@@ -108,8 +108,6 @@ public class PlayerInfo implements Info {
 
     public void stop() {
         transportInfo = new TransportInfo(TransportState.STOPPED);
-        positionInfo = new PositionInfo();
-        mediaInfo = new MediaInfo();
     }
 
     public void updateSeek(String progress) {
@@ -120,4 +118,10 @@ public class PlayerInfo implements Info {
         mMute = mute;
     }
 
+    public void clear() {
+        positionInfo = new PositionInfo();
+        mediaInfo = new MediaInfo();
+        transportInfo = new TransportInfo();
+
+    }
 }

@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.abooc.upnp.Discovery;
+import com.abooc.upnp.DlnaManager;
 import com.abooc.widget.Toast;
 
 import demo.abooc.com.upnp.R;
@@ -17,9 +18,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Discovery mDiscovery = Discovery.get();
-//        mDiscovery.setFilter(new Filter());
-        mDiscovery.bindServer(this);
+        DlnaManager.getInstance().startService(this);
+        Discovery.get().init(this);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        Discovery.get().unbindServer(this);
+        DlnaManager.getInstance().stop();
+        Discovery.get().exit(this);
     }
 }
