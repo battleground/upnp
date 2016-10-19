@@ -7,7 +7,6 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.abooc.util.Debug;
-import com.abooc.widget.Toast;
 
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.controlpoint.SubscriptionCallback;
@@ -205,7 +204,6 @@ public class DlnaManager {
             @Override
             protected void failed(GENASubscription subscription, UpnpResponse response, Exception exception, String defaultMsg) {
                 Debug.e(createDefaultFailureMessage(response, exception));
-                Toast.show("远端没有响应");
                 hasBound = false;
                 if (mSimpleSubscriptionCallback != null) {
                     mSimpleSubscriptionCallback.failed(subscription, response, exception, defaultMsg);
@@ -216,7 +214,6 @@ public class DlnaManager {
             public void ended(GENASubscription sub, CancelReason reason, UpnpResponse response) {
                 // Reason should be null, or it didn't end regularly
                 Debug.anchor();
-                Toast.show("订阅结束");
                 hasBound = false;
                 if (mSimpleSubscriptionCallback != null) {
                     mSimpleSubscriptionCallback.ended(sub, reason, response);

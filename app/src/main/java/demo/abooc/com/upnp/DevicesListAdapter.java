@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckedTextView;
 import android.widget.TextView;
 
 import com.abooc.upnp.model.DeviceDisplay;
@@ -47,6 +48,10 @@ public class DevicesListAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public List<DeviceDisplay> getList() {
+        return mList;
+    }
+
     public void add(DeviceDisplay device) {
         mList.add(device);
         notifyDataSetChanged();
@@ -70,14 +75,16 @@ public class DevicesListAdapter extends BaseAdapter {
     }
 
     void attach(DeviceDisplay display, View view) {
-        TextView name = (TextView) view.findViewById(R.id.name);
+        CheckedTextView nameText = (CheckedTextView) view.findViewById(R.id.name);
         TextView friendlyName = (TextView) view.findViewById(R.id.friendlyName);
         TextView serialNumber = (TextView) view.findViewById(R.id.serialNumber);
         TextView JsonText = (TextView) view.findViewById(R.id.Json);
 
-        name.setText(display.getDevice().getFriendlyName());
+        nameText.setText(display.getDevice().getFriendlyName());
         friendlyName.setText(display.getDevice().getModelName());
         serialNumber.setText(display.getHost());
         JsonText.setText(display.getDevice().getModelName());
+
+        nameText.setChecked(display.isChecked());
     }
 }

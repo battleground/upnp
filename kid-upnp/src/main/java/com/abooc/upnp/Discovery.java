@@ -14,6 +14,7 @@ import com.abooc.util.Debug;
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.android.NetworkUtils;
 import org.fourthline.cling.model.message.header.ServiceTypeHeader;
+import org.fourthline.cling.model.meta.DeviceIdentity;
 import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
@@ -93,7 +94,17 @@ public class Discovery extends DefaultRegistryListener {
 
     public void removeAll() {
         if (mUPnPService != null) {
-            mUPnPService.getRegistry().removeAllRemoteDevices();
+            if (DlnaManager.getInstance().hasBound()) {
+                DeviceIdentity boundIdentity = DlnaManager.getInstance().getBoundIdentity();
+                Collection<RemoteDevice> devices = mUPnPService.getRegistry().getRemoteDevices();
+                for (RemoteDevice device : devices) {
+                    if (!device.getIdentity().equals(boundIdentity)) {
+                        mUPnPService.getRegistry().removeDevice(device);
+                    }
+                }
+            } else {
+                mUPnPService.getRegistry().removeAllRemoteDevices();
+            }
         }
     }
 
@@ -103,6 +114,10 @@ public class Discovery extends DefaultRegistryListener {
             ArrayList<DeviceDisplay> list = new ArrayList<>();
             for (RemoteDevice device : devices) {
                 DeviceDisplay display = new DeviceDisplay(new CDevice(device));
+                DeviceIdentity boundIdentity = DlnaManager.getInstance().getBoundIdentity();
+                if (device.getIdentity().equals(boundIdentity)) {
+                    display.setChecked(true);
+                }
                 list.add(display);
             }
             return list;

@@ -28,6 +28,7 @@ import org.fourthline.cling.model.message.header.DeviceTypeHeader;
 import org.fourthline.cling.model.message.header.STAllHeader;
 import org.fourthline.cling.model.message.header.ServiceTypeHeader;
 import org.fourthline.cling.model.meta.Device;
+import org.fourthline.cling.model.meta.DeviceIdentity;
 import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.types.DeviceType;
 import org.fourthline.cling.model.types.UDAServiceType;
@@ -75,12 +76,14 @@ public class ScanActivity extends AppCompatActivity
                         CDevice cDevice = new CDevice(device);
                         if (cDevice.asService("AVTransport")) {
                             DeviceDisplay deviceDisplay = new DeviceDisplay(cDevice);
-                            mListAdapter.add(deviceDisplay);
-                            getSupportActionBar().setTitle("扫描设备...，已发现" + mListAdapter.getCount() + "个");
+                            if (!mListAdapter.getList().contains(deviceDisplay)) {
+                                mListAdapter.add(deviceDisplay);
+                                getSupportActionBar().setTitle("扫描设备...，已发现" + mListAdapter.getCount() + "个");
 
-                            Device boundDevice = DlnaManager.getInstance().getBoundDevice();
-                            if (device.equals(boundDevice)) {
-                                deviceDisplay.setChecked(true);
+                                DeviceIdentity boundIdentity = DlnaManager.getInstance().getBoundIdentity();
+                                if (device.getIdentity().equals(boundIdentity)) {
+                                    deviceDisplay.setChecked(true);
+                                }
                             }
                         }
                     }
@@ -208,6 +211,9 @@ public class ScanActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        DeviceIdentity boundIdentity = DlnaManager.getInstance().getBoundIdentity();
+
+        Debug.anchor(boundIdentity);
         mDiscovery.search();
     }
 
