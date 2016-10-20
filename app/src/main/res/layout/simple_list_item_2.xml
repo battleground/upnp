@@ -31,24 +31,10 @@
         android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 
     <TextView
-        android:id="@+id/friendlyName"
+        android:id="@+id/IP"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="friendlyName"
-        android:textSize="10sp" />
-
-    <TextView
-        android:id="@+id/serialNumber"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="serialNumber"
-        android:textSize="10sp" />
-
-    <TextView
-        android:id="@+id/Json"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Json"
         android:textSize="10sp" />
 
 </LinearLayout>

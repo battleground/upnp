@@ -72,6 +72,7 @@ public class DlnaManager {
     }
 
     private DlnaManager() {
+        Debug.debug();
     }
 
     private Context mContext;

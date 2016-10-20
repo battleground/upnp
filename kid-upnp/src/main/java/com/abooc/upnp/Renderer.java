@@ -10,6 +10,7 @@ import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.Service;
 import org.fourthline.cling.model.types.UDAServiceType;
+import org.fourthline.cling.support.avtransport.callback.GetPositionInfo;
 import org.fourthline.cling.support.renderingcontrol.callback.GetMute;
 import org.fourthline.cling.support.renderingcontrol.callback.SetMute;
 import org.fourthline.cling.support.renderingcontrol.callback.SetVolume;
@@ -37,7 +38,7 @@ public class Renderer {
         mDevice = device;
     }
 
-    public static Renderer build(ControlPoint controlPoint, Device device) {
+    protected static Renderer build(ControlPoint controlPoint, Device device) {
         return mOur = new Renderer(controlPoint, device);
     }
 
@@ -66,9 +67,10 @@ public class Renderer {
     }
 
     public void execute(ActionCallback actionCallback) {
-//        if (!(actionCallback instanceof GetPositionInfo)) {
-//            Debug.anchor(actionCallback.getActionInvocation().getAction());
-//        }
+        if (!(actionCallback instanceof GetPositionInfo)) {
+            String boundIp = DlnaManager.getInstance().getBoundIp();
+            Debug.anchor(boundIp + ":" + actionCallback.getActionInvocation().getAction());
+        }
         isSending = true;
         if (iOnActionListener != null) {
             iOnActionListener.onSend();

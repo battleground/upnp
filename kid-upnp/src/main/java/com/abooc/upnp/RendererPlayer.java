@@ -47,15 +47,16 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
     }
 
     private RendererPlayer() {
+        Debug.debug();
     }
 
-    public static RendererPlayer build(Renderer renderer) {
+    protected static RendererPlayer build(Renderer renderer) {
         mOur.iRenderer = renderer;
         mOur.mPlayerInfo = renderer.getPlayerInfo();
         return mOur;
     }
 
-    public RendererPlayer get() {
+    public static RendererPlayer get() {
         return mOur;
     }
 
@@ -90,7 +91,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
 
     public void start(String uri, String metadata) {
         if (!iRenderer.isAVTransport()) return;
-        Debug.anchor(uri);
+        Debug.anchor(uri + "\n metadata:" + metadata);
         execute(new SetAVTransportURI(getAVTransportService(), uri, metadata) {
             @Override
             public void success(ActionInvocation invocation) {
@@ -235,7 +236,9 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
 
                 long duration = positionInfo.getTrackDurationSeconds();
                 long progress = positionInfo.getTrackElapsedSeconds();
-                if ((Math.abs(duration - progress)) <= toleranceSeconds) {
+                if (duration > 0
+                        && duration >= progress
+                        && (duration - progress) <= toleranceSeconds) {
                     if (!hasCallEnd) {
                         hasCallEnd = true;
                         mOnRendererListener.onRemotePlayEnd();
@@ -247,6 +250,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
 
             @Override
             public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
+                Debug.e(operation.toString());
                 onSendFinish(false);
             }
         });
@@ -274,6 +278,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
             @Override
             public void received(ActionInvocation invocation, TransportInfo transportInfo) {
                 TransportState transportState = transportInfo.getCurrentTransportState();
+                mOnRendererListener.onRemoteStateChanged(transportState);
                 handState(transportState);
                 mPlayerInfo.update(transportState);
                 mPlayerInfo.updateTransportInfo(transportInfo);
@@ -298,15 +303,12 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
                 break;
             case PLAYING:
                 mOnRendererListener.onRemotePlaying();
-                mOnRendererListener.onRemoteStateChanged(TransportState.PLAYING);
                 break;
             case PAUSED_PLAYBACK:
                 mOnRendererListener.onRemotePaused();
-                mOnRendererListener.onRemoteStateChanged(TransportState.PAUSED_PLAYBACK);
                 break;
             case STOPPED:
                 mOnRendererListener.onRemoteStopped();
-                mOnRendererListener.onRemoteStateChanged(TransportState.STOPPED);
                 break;
             case TRANSITIONING:
                 mOnRendererListener.onRemoteSeeking();
@@ -336,13 +338,17 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
         Debug.e(this);
     }
 
+    private boolean isRunning;
+
     public void startTrack() {
+        isRunning = true;
         iThread = new Thread(this);
         iThread.start();
         Debug.anchor();
     }
 
     public void stopTrack() {
+        isRunning = false;
         if (iThread != null)
             iThread.interrupt();
         iThread = null;
@@ -361,7 +367,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
         Thread thisThread = Thread.currentThread();
         try {
             int count = 0;
-            while (iThread == thisThread) {
+            while (isRunning) {
                 count++;
 
                 if (mPlayerInfo.isPlaying()) {

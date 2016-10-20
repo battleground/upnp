@@ -23,11 +23,11 @@ import org.fourthline.cling.model.ModelUtil;
 import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Device;
-import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
 import org.fourthline.cling.support.model.MediaInfo;
 import org.fourthline.cling.support.model.PositionInfo;
 import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.TransportState;
+import org.fourthline.cling.support.model.item.ImageItem;
 import org.fourthline.cling.support.model.item.Item;
 import org.fourthline.cling.support.renderingcontrol.callback.GetVolume;
 
@@ -49,18 +49,19 @@ public class PlayerActivity extends AppCompatActivity
     }
 
     private VideoPlayerView mVideoPlayerView;
-    private TextView mTextUri;
+    private TextView mMessageView;
     private View mWaitingView;
 
     private Renderer mRenderer;
     private RendererPlayer mRendererPlayer;
+    private MediaInfoView mMediaInfoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mRenderer = Renderer.get();
-        mRendererPlayer = RendererPlayer.build(mRenderer);
+        mRendererPlayer = RendererPlayer.get();
         mRendererPlayer.startTrack();
         mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
 
@@ -74,13 +75,21 @@ public class PlayerActivity extends AppCompatActivity
         mVideoPlayerView.setOnSeekBarChangeListener(iOnSeekBarChangeListener);
         mVideoPlayerView.attachRouterEvent(this, iOnSeekBarChangeListener);
         mVideoPlayerView.setOnButtonClickListener(this);
-        mTextUri = (TextView) findViewById(R.id.Uri);
+        mMessageView = (TextView) findViewById(R.id.MessageView);
         mWaitingView = findViewById(R.id.Waiting);
+
+        mMediaInfoView = new MediaInfoView(findViewById(R.id.MediaInfoView));
 
     }
 
     private OnRendererListener.SimpleOnRendererListener mSimpleOnRendererListener =
             new OnRendererListener.SimpleOnRendererListener() {
+                @Override
+                public void onRemoteStateChanged(TransportState state) {
+                    mMediaInfoView.setState(state.name());
+
+                }
+
                 @Override
                 public void onRemotePlaying() {
                     runOnUiThread(new Runnable() {
@@ -133,11 +142,8 @@ public class PlayerActivity extends AppCompatActivity
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        mVideoPlayerView.setState(TransportState.NO_MEDIA_PRESENT);
-        mVideoPlayerView.setTitle("投屏");
-
         mRenderer = Renderer.get();
-        mRendererPlayer = RendererPlayer.build(mRenderer);
+        mRendererPlayer = RendererPlayer.get();
         mRendererPlayer.addOnRendererListener(mSimpleOnRendererListener);
 
         Device boundDevice = DlnaManager.getInstance().getBoundDevice();
@@ -164,7 +170,6 @@ public class PlayerActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        mRendererPlayer.getPositionInfo();
         mRendererPlayer.getMediaInfo(mMediaInfoCallback);
         mRenderer.getMute();
 
@@ -200,12 +205,8 @@ public class PlayerActivity extends AppCompatActivity
                 if (mRenderer.getPlayerInfo().isStop()
                         || mRenderer.getPlayerInfo().getTransportState() == TransportState.NO_MEDIA_PRESENT) {
 //                    mRendererPlayer.addCallback(onSendListener);
-
-                    Res res = UPnP.buildRes("video/*", AppTestResources.videoUri, AppTestResources.videoUri, 0);
-                    VRVideoItem videoItem = new VRVideoItem(0, "1", String.valueOf(1), "天空之城[高清国语]", "creator", res);
-                    String metadata = UPnP.buildMetadataXml(videoItem);
-
-                    mRendererPlayer.start(AppTestResources.videoUri, metadata);
+//                    flyVideo();
+                    flyImage(AppTestResources.imageUri);
                 } else {
                     mRendererPlayer.play();
                 }
@@ -231,10 +232,31 @@ public class PlayerActivity extends AppCompatActivity
     private OnGotMediaInfoCallback mMediaInfoCallback = new OnGotMediaInfoCallback() {
         @Override
         public void onGotMediaInfo(final MediaInfo mediaInfo) {
+            final Item item = UPnP.parseCurrentURIMetaData(mediaInfo.getCurrentURIMetaData());
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    setMediaInfo(mediaInfo);
+                    if (item == null) {
+                        getSupportActionBar().setTitle("--");
+                        mVideoPlayerView.setTitle("--");
+                        mMediaInfoView.setVisibility(View.GONE);
+                        mMediaInfoView.clear();
+                        mMessageView.setVisibility(View.VISIBLE);
+                        return;
+                    }
+                    mMessageView.setVisibility(View.GONE);
+                    mMediaInfoView.setVisibility(View.VISIBLE);
+
+
+                    mMediaInfoView.setID(item.getId());
+                    mMediaInfoView.setParentID(item.getParentID());
+                    mMediaInfoView.setRefID(item.getRefID());
+                    mMediaInfoView.setTitle(item.getTitle());
+                    mMediaInfoView.setCreatorText(item.getCreator());
+//                    mMediaInfoView.setDateText(trackMetaData.getName());
+                    mMediaInfoView.setUrlText(mediaInfo.getCurrentURI());
+                    mMediaInfoView.setMetadataText(mediaInfo.getCurrentURIMetaData());
                 }
             });
         }
@@ -303,17 +325,6 @@ public class PlayerActivity extends AppCompatActivity
         return super.onKeyDown(keyCode, event);
     }
 
-    private void setMediaInfo(MediaInfo mediaInfo) {
-        String currentURIMetaData = mediaInfo.getCurrentURIMetaData();
-        AVTransportVariable.CurrentTrackMetaData trackMetaData = new AVTransportVariable.CurrentTrackMetaData(currentURIMetaData);
-        mTextUri.setText(trackMetaData.getName() + ", " + mediaInfo.getCurrentURI());
-
-        Item item = UPnP.parseCurrentURIMetaData(mediaInfo.getCurrentURIMetaData());
-        if (item != null) {
-            getSupportActionBar().setTitle(item.getTitle());
-        }
-    }
-
     private void updateStateMessage(TransportState state) {
         switch (state) {
             case NO_MEDIA_PRESENT:
@@ -343,10 +354,29 @@ public class PlayerActivity extends AppCompatActivity
     }
 
     public void onStartEvent(View view) {
+        switch (view.getId()) {
+            case R.id.ButtonStartVideo:
+                flyVideo();
+                break;
+            case R.id.ButtonStartImage:
+                flyImage(AppTestResources.imageUri);
+                break;
+        }
+    }
+
+    public void flyVideo() {
         Res res = UPnP.buildRes("video/vr", AppTestResources.videoUri, AppTestResources.videoUri, 0);
         VRVideoItem videoItem = new VRVideoItem(3, "1", String.valueOf(1), "天空之城[高清国语]", "creator", res);
         String metadata = UPnP.buildMetadataXml(videoItem);
         mRendererPlayer.start(AppTestResources.videoUri, metadata);
+    }
+
+    public void flyImage(String url) {
+        url = "http://192.168.8.171:8196/ImageItem-226";
+        Res res = UPnP.buildRes("image/jpeg", "filePath", url, 0);
+        ImageItem videoItem = new ImageItem("1", String.valueOf(1), "图来了", "creator", res);
+        String metadata = UPnP.buildMetadataXml(videoItem);
+        mRendererPlayer.start(url, metadata);
     }
 
     public void onGetVolumeEvent(View view) {

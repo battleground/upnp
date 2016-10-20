@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.abooc.upnp.Discovery;
 import com.abooc.upnp.DlnaManager;
+import com.abooc.upnp.RendererPlayer;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.util.Debug;
@@ -256,7 +257,19 @@ public class ScanActivity extends AppCompatActivity
 
         CDevice cDevice = (CDevice) mDeviceDisplay.getDevice();
         Device device = cDevice.getDevice();
-        DlnaManager.getInstance().bind(device, null);
+
+
+        if (DlnaManager.getInstance().hasBound()) {
+            DeviceIdentity boundIdentity = DlnaManager.getInstance().getBoundIdentity();
+            if (!boundIdentity.equals(device.getIdentity())) {
+                // 停止掉当前投放的视频
+                RendererPlayer.get().stop();
+                DlnaManager.getInstance().unbound();
+                DlnaManager.getInstance().bind(device, null);
+            }
+        } else {
+            DlnaManager.getInstance().bind(device, null);
+        }
 
         PlayerActivity.launch(this);
         finish();
