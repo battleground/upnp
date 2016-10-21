@@ -112,6 +112,7 @@ public class DlnaManager {
             mSimpleSubscriptionCallback = callback;
 
             Renderer build = Renderer.build(mUpnpService.getControlPoint(), device);
+            RendererPlayer.build(build);
             Service avTransportService = build.getAVTransportService();
             SubscriptionCallback subscriptionEvent = createSubscriptionEvent(avTransportService);
             mUpnpService.getControlPoint().execute(subscriptionEvent);

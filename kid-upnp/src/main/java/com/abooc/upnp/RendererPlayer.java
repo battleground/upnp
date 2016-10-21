@@ -364,7 +364,6 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
     @Override
     public void run() {
         Debug.anchor();
-        Thread thisThread = Thread.currentThread();
         try {
             int count = 0;
             while (isRunning) {

@@ -27,19 +27,24 @@ public class Renderer {
 
     private OnActionListener iOnActionListener;
 
-    private static Renderer mOur;
+    private static Renderer mOur = new Renderer();
+
     private Device mDevice;
 
 
-    private Renderer(ControlPoint controlPoint, Device device) {
+    private Renderer() {
         Debug.debug();
-        mPlayerInfo = new PlayerInfo();
-        mControlPoint = controlPoint;
-        mDevice = device;
     }
 
     protected static Renderer build(ControlPoint controlPoint, Device device) {
-        return mOur = new Renderer(controlPoint, device);
+        mOur.init(controlPoint, device);
+        return mOur;
+    }
+
+    private void init(ControlPoint controlPoint, Device device) {
+        mPlayerInfo = new PlayerInfo();
+        mControlPoint = controlPoint;
+        mDevice = device;
     }
 
     public static Renderer get() {
