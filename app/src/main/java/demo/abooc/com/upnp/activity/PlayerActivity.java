@@ -136,6 +136,12 @@ public class PlayerActivity extends AppCompatActivity
                 @Override
                 public void onRemotePlayEnd() {
                     Debug.e("播放完毕");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mVideoPlayerView.setState(TransportState.STOPPED);
+                        }
+                    });
                 }
             };
 

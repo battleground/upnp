@@ -252,7 +252,7 @@ public class KidsActivity extends AppCompatActivity
 //        mRenderer.getVolume();
         mRenderer.getMute();
 
-        mPlayer = RendererPlayer.build(mRenderer);
+        mPlayer = RendererPlayer.get();
         getRendererPlayer().getPositionInfo();
         getRendererPlayer().getMediaInfo(null);
 

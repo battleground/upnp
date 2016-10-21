@@ -31,12 +31,16 @@ import org.fourthline.cling.model.message.header.ServiceTypeHeader;
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.DeviceIdentity;
 import org.fourthline.cling.model.meta.RemoteDevice;
+import org.fourthline.cling.model.meta.RemoteDeviceIdentity;
 import org.fourthline.cling.model.types.DeviceType;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
 import org.fourthline.cling.transport.Router;
 import org.fourthline.cling.transport.RouterException;
+
+import java.util.Collections;
+import java.util.Comparator;
 
 import demo.abooc.com.upnp.DevicesListAdapter;
 import demo.abooc.com.upnp.R;
@@ -69,6 +73,27 @@ public class ScanActivity extends AppCompatActivity
         mDiscovery = Discovery.get();
         mDiscovery.addDefaultRegistryListener(new DefaultRegistryListener() {
 
+
+            private Comparator<DeviceDisplay> comparator = new Comparator<DeviceDisplay>() {
+                @Override
+                public int compare(DeviceDisplay lhs, DeviceDisplay rhs) {
+                    String ipThis = lhs.getHost().substring(lhs.getHost().lastIndexOf(".") + 1);
+                    Integer intThis = Integer.valueOf(ipThis);
+
+                    String anotherHost = rhs.getHost();
+                    String ipAnother = anotherHost.substring(anotherHost.lastIndexOf(".") + 1);
+                    Integer intAnother = Integer.valueOf(ipAnother);
+
+                    if (intThis > intAnother) {
+                        return 1;
+                    } else if (intThis == intAnother) {
+                        return 0;
+                    } else {
+                        return -1;
+                    }
+                }
+            };
+
             @Override
             public void remoteDeviceAdded(Registry registry, final RemoteDevice device) {
                 runOnUiThread(new Runnable() {
@@ -78,8 +103,16 @@ public class ScanActivity extends AppCompatActivity
                         if (cDevice.asService("AVTransport")) {
                             DeviceDisplay deviceDisplay = new DeviceDisplay(cDevice);
                             if (!mListAdapter.getList().contains(deviceDisplay)) {
-                                mListAdapter.add(deviceDisplay);
-                                getSupportActionBar().setTitle("扫描设备...，已发现" + mListAdapter.getCount() + "个");
+                                RemoteDeviceIdentity identity = device.getIdentity();
+                                String host = identity.getDescriptorURL().getHost();
+                                deviceDisplay.setHost(host);
+
+
+                                mListAdapter.getList().add(deviceDisplay);
+                                Collections.sort(mListAdapter.getList(), comparator);
+                                mListAdapter.notifyDataSetChanged();
+
+                                getSupportActionBar().setTitle("请选择设备，已发现" + mListAdapter.getCount() + "个");
 
                                 DeviceIdentity boundIdentity = DlnaManager.getInstance().getBoundIdentity();
                                 if (device.getIdentity().equals(boundIdentity)) {
@@ -104,7 +137,7 @@ public class ScanActivity extends AppCompatActivity
                                 mEmptyView.setText("没有可用的设备");
                             }
                         }
-                        getSupportActionBar().setTitle("扫描设备...，已发现" + mListAdapter.getCount() + "个");
+                        getSupportActionBar().setTitle("请选择设备，已发现" + mListAdapter.getCount() + "个");
                     }
                 });
             }
@@ -226,7 +259,7 @@ public class ScanActivity extends AppCompatActivity
     private UITimer iUITimer = new UITimer(2) {
         @Override
         public void onStart() {
-            getSupportActionBar().setTitle("扫描设备...");
+            getSupportActionBar().setTitle("开始扫描...");
             mEmptyView.setText("扫描中...");
 
             Discovery.get().removeAll();

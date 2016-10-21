@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.abooc.upnp.model.DeviceDisplay;
 
-import org.fourthline.cling.model.meta.DeviceIdentity;
 import org.fourthline.cling.model.meta.RemoteDeviceIdentity;
 
 import java.util.ArrayList;
@@ -79,9 +78,14 @@ public class DevicesListAdapter extends BaseAdapter {
 
     void attach(DeviceDisplay display, View view) {
         CheckedTextView nameText = (CheckedTextView) view.findViewById(R.id.name);
+        TextView modelText = (TextView) view.findViewById(R.id.Model);
         TextView IPText = (TextView) view.findViewById(R.id.IP);
         nameText.setText(display.getDevice().getFriendlyName());
+
+
+        String manufacturer = display.getDevice().getManufacturer();
         RemoteDeviceIdentity identity = (RemoteDeviceIdentity) display.getOriginDevice().getIdentity();
+        modelText.setText(manufacturer);
         IPText.setText(identity.getDescriptorURL().getHost());
         nameText.setChecked(display.isChecked());
     }
