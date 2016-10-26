@@ -146,7 +146,69 @@ public class ExampleUnitTest {
 
 
     @Test
+    public void encoder() {
+        String str = "中国";
+        String str_GBK = "�й�";
+        String origin = "���\b���������������V*J-.�)Q�2�QJ�OIU�230�\u0005���*ݻ\u0017������";
+
+        try {
+            byte[] bytes = str_GBK.getBytes();
+            System.out.println(
+                    toString(bytes) + "\n"
+                            + ": " + new String(bytes, "GBK") + "\n"
+                            + ": " + new String(str_GBK.getBytes("GBK"), "UTF-8") + "\n"
+                    + ": " + new String(origin.getBytes("UTF-8"), "gzip") + "\n"
+                            + ": " + new String(str.getBytes("GB2312"), "GB2312") + "\n"
+            );
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    String toString(byte[] bytes) {
+        StringBuffer buffer = new StringBuffer();
+        for (byte b : bytes) {
+            buffer.append(b).append(",");
+        }
+        return buffer.toString();
+    }
+
+
+    @Test
     public void sort() {
+
+        String origin = "���\b���������������V*J-.�)Q�2�QJ�OIU�230�\u0005���*ݻ\u0017������";
+        String encode = "\\ufffd\\ufffd\\ufffd\\u0008\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\u0056\\u002a\\u004a\\u002d\\u002e\\ufffd\\u0029\\u0051\\ufffd\\u0032\\ufffd\\u0051\\u004a\\ufffd\\u004f\\u0049\\u0055\\ufffd\\u0032\\u0033\\u0030\\ufffd\\u0005\\ufffd\\ufffd\\ufffd\\u002a\\u077b\\u0017\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd\\ufffd";
+
+        try {
+//            String utf_8_origin = new String(origin.getBytes(), "UTF-8");
+//            String gbk_origin = new String(origin.getBytes(), "GBK");
+//
+//            String utf_8 = new String(encode.getBytes(), "UTF-8");
+//            String gbk = new String(encode.getBytes(), "GBK");
+
+            String gb2312 = new String(encode.getBytes(), "GB2312");
+
+
+            String utf_8_origin = URLDecoder.decode(origin, "UTF-8");
+            String gbk_origin = URLDecoder.decode(origin, "GBK");
+            String utf_8 = URLDecoder.decode(encode, "UTF-8");
+            String gbk = URLDecoder.decode(encode, "GBK");
+
+
+            System.out.println(
+                    "utf_8_origin:" + utf_8_origin + "\n"
+                            + "gbk_origin:" + gbk_origin + "\n"
+                            + "utf_8:" + utf_8 + "\n"
+                            + "gbk:" + gbk + "\n"
+                            + "gb2312:" + gb2312 + "\n"
+            );
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
 
     }

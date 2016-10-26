@@ -29,6 +29,7 @@ import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.TransportState;
 import org.fourthline.cling.support.model.item.ImageItem;
 import org.fourthline.cling.support.model.item.Item;
+import org.fourthline.cling.support.model.item.Photo;
 import org.fourthline.cling.support.renderingcontrol.callback.GetVolume;
 
 import demo.abooc.com.upnp.AppTestResources;
@@ -379,8 +380,9 @@ public class PlayerActivity extends AppCompatActivity
 
     public void flyImage(String url) {
         url = "http://192.168.8.171:8196/ImageItem-226";
+        url = "http://images.apple.com/v/home/cx/images/gallery/iphone_square_large.jpg";
         Res res = UPnP.buildRes("image/jpeg", "filePath", url, 0);
-        ImageItem videoItem = new ImageItem("1", String.valueOf(1), "图来了", "creator", res);
+        Photo videoItem = new Photo("1", String.valueOf(1), "图来了", "unknown", "unknown", res);
         String metadata = UPnP.buildMetadataXml(videoItem);
         mRendererPlayer.start(url, metadata);
     }

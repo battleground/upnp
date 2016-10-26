@@ -27,16 +27,33 @@
         android:layout_height="wrap_content"
         android:background="?android:attr/activatedBackgroundIndicator"
         android:checkMark="?android:attr/listChoiceIndicatorSingle"
+        android:ellipsize="end"
         android:gravity="center_vertical"
+        android:singleLine="true"
         android:text="name"
+        android:textStyle="bold"
         android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingLeft="12dip"
-        android:paddingRight="12dp">
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ip:"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/IP"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#EEE"
+            android:padding="2dp"
+            android:text="0.0.0.0"
+            android:textSize="12sp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -49,30 +66,11 @@
             android:id="@+id/Model"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="#EEE"
             android:padding="2dp"
             android:text="Xiao mi"
-            android:background="#EEE"
             android:textSize="12sp"
             android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-6dp"
-            android:layout_marginLeft="12dp"
-            android:background="#EEE"
-            android:text="ip:"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/IP"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-6dp"
-            android:background="#EEE"
-            android:padding="2dp"
-            android:text="0.0.0.1"
-            android:textSize="12sp" />
 
     </LinearLayout>
 

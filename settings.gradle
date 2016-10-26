@@ -1,2 +1,3 @@
 include ':app'
+include ':browser'
 include ':kid-upnp'
