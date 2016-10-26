@@ -16,6 +16,7 @@ import org.fourthline.cling.android.NetworkUtils;
 import org.fourthline.cling.model.message.header.ServiceTypeHeader;
 import org.fourthline.cling.model.meta.DeviceIdentity;
 import org.fourthline.cling.model.meta.RemoteDevice;
+import org.fourthline.cling.model.meta.RemoteDeviceIdentity;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
@@ -118,6 +119,9 @@ public class Discovery extends DefaultRegistryListener {
                 if (device.getIdentity().equals(boundIdentity)) {
                     display.setChecked(true);
                 }
+                RemoteDeviceIdentity identity = device.getIdentity();
+                String host = identity.getDescriptorURL().getHost();
+                display.setHost(host);
                 list.add(display);
             }
             return list;
@@ -179,7 +183,9 @@ public class Discovery extends DefaultRegistryListener {
                         case DISCONNECTED:
                             if (isOn) {
                                 isOn = false;
-                                removeAll();
+                                if (mUPnPService != null) {
+                                    mUPnPService.getRegistry().removeAllRemoteDevices();
+                                }
                                 turnOffRouter();
                             }
                             break;
