@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="demo.com.abooc.upnp.browser.UPnPDirectoryActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <fragment
+                android:id="@+id/LibrariesFragment"
+                android:name="demo.com.abooc.upnp.browser.LibrariesFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <FrameLayout
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:background="#CCC" />
+
+            <fragment
+                android:id="@+id/PlayerListFragment"
+                android:name="demo.com.abooc.upnp.browser.PlayerListFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#CCC" />
+
+        <fragment
+            android:id="@+id/ContentListFragment"
+            class="demo.com.abooc.upnp.browser.ContentListFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/Refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@android:drawable/list_selector_background"
+        android:onClick="onRefresh"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:src="@android:drawable/ic_menu_rotate" />
+
+</FrameLayout>
