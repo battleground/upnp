@@ -27,7 +27,6 @@ import org.fourthline.cling.support.model.MediaInfo;
 import org.fourthline.cling.support.model.PositionInfo;
 import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.TransportState;
-import org.fourthline.cling.support.model.item.ImageItem;
 import org.fourthline.cling.support.model.item.Item;
 import org.fourthline.cling.support.model.item.Photo;
 import org.fourthline.cling.support.renderingcontrol.callback.GetVolume;
@@ -55,11 +54,13 @@ public class PlayerActivity extends AppCompatActivity
 
     private Renderer mRenderer;
     private RendererPlayer mRendererPlayer;
+    private RendererInfoView mRendererInfoView;
     private MediaInfoView mMediaInfoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mRenderer = Renderer.get();
         mRendererPlayer = RendererPlayer.get();
@@ -79,6 +80,7 @@ public class PlayerActivity extends AppCompatActivity
         mMessageView = (TextView) findViewById(R.id.MessageView);
         mWaitingView = findViewById(R.id.Waiting);
 
+        mRendererInfoView = new RendererInfoView(findViewById(R.id.RendererInfoView));
         mMediaInfoView = new MediaInfoView(findViewById(R.id.MediaInfoView));
 
     }
@@ -141,8 +143,19 @@ public class PlayerActivity extends AppCompatActivity
                         @Override
                         public void run() {
                             mVideoPlayerView.setState(TransportState.STOPPED);
+                            mVideoPlayerView.setTitle("没有媒体在播放");
                         }
                     });
+                }
+
+                @Override
+                public void onRemoteMuteChanged(boolean mute) {
+                    mRendererInfoView.setMute(mute);
+                }
+
+                @Override
+                public void onRemoteVolumeChanged(long volume) {
+                    mRendererInfoView.setVolume(volume);
                 }
             };
 
@@ -167,6 +180,9 @@ public class PlayerActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
             case R.id.menu_switch:
                 ScanActivity.launch(this);
                 break;
@@ -177,6 +193,12 @@ public class PlayerActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+
+        Device boundDevice = DlnaManager.getInstance().getBoundDevice();
+        String friendlyName = boundDevice.getDetails().getFriendlyName();
+        mRendererInfoView.setDeviceInfo(friendlyName + "" + boundDevice.getType());
+
+
         mRendererPlayer.getMediaInfo(mMediaInfoCallback);
         mRenderer.getMute();
 
@@ -226,6 +248,7 @@ public class PlayerActivity extends AppCompatActivity
             case R.id.Stop:
                 Toast.show("即将停止...");
                 mRendererPlayer.stop();
+                mRendererPlayer.stopTrack();
                 mVideoPlayerView.setState(TransportState.STOPPED);
                 break;
             case R.id.VolumeMute:
@@ -246,12 +269,15 @@ public class PlayerActivity extends AppCompatActivity
                 public void run() {
                     if (item == null) {
                         getSupportActionBar().setTitle("--");
-                        mVideoPlayerView.setTitle("--");
+                        mVideoPlayerView.setState(TransportState.STOPPED);
                         mMediaInfoView.setVisibility(View.GONE);
                         mMediaInfoView.clear();
                         mMessageView.setVisibility(View.VISIBLE);
                         return;
                     }
+
+                    getSupportActionBar().setTitle(item.getTitle());
+
                     mMessageView.setVisibility(View.GONE);
                     mMediaInfoView.setVisibility(View.VISIBLE);
 
@@ -357,6 +383,7 @@ public class PlayerActivity extends AppCompatActivity
 
     public void onStopEvent(View view) {
         mRendererPlayer.stop();
+        mRendererPlayer.stopTrack();
         mVideoPlayerView.setState(TransportState.STOPPED);
     }
 

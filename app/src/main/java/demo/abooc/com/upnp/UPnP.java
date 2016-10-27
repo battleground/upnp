@@ -8,7 +8,9 @@ import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.item.Item;
 import org.seamless.util.MimeType;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -34,7 +36,12 @@ public class UPnP {
     public static Res buildRes(String mimeType, String filePath, String url, long size) {
         Res res = new Res(new MimeType(mimeType.substring(0, mimeType.indexOf('/')),
                 mimeType.substring(mimeType.indexOf('/') + 1)), size, url);
-        res.setImportUri(URI.create(url));
+        try {
+            String encode = URLEncoder.encode(filePath, "UTF-8");
+            res.setImportUri(URI.create(encode));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         return res;
     }
 
@@ -48,18 +55,6 @@ public class UPnP {
             List<Item> items = didlContent.getItems();
             if (items.isEmpty()) return null;
             Item item = items.get(0);
-
-//            String itemId = item.getId();
-//            String refID = item.getRefID();
-//            String parentID = item.getParentID();
-//            boolean restricted = item.isRestricted();
-
-//            Debug.anchor(
-//                    "itemId:" + itemId + "\n"
-//                            + "refID:" + refID + "\n"
-//                            + "parentID:" + parentID + "\n"
-//                            + "是否保密:" + restricted + "\n"
-//                            + ToString.toString(items));
             return item;
         } catch (Exception e) {
             Debug.e(e);

@@ -22,7 +22,6 @@ import com.abooc.upnp.RendererPlayer;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.util.Debug;
-import com.abooc.widget.Toast;
 
 import org.fourthline.cling.android.NetworkUtils;
 import org.fourthline.cling.model.message.header.DeviceTypeHeader;
@@ -36,8 +35,6 @@ import org.fourthline.cling.model.types.DeviceType;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
-import org.fourthline.cling.transport.Router;
-import org.fourthline.cling.transport.RouterException;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -66,6 +63,7 @@ public class ScanActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setContentView(R.layout.activity_scan);
         mEmptyView = (TextView) findViewById(android.R.id.empty);
@@ -169,38 +167,19 @@ public class ScanActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void turnRouter() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Router router = DlnaManager.getInstance().getBindRouter();
-                    if (router.isEnabled()) {
-                        Toast.show("关闭");
-                        Debug.anchor("disable");
-                        router.disable();
-                    } else {
-                        Toast.show("开启");
-                        Debug.anchor("enable");
-                        router.enable();
-                    }
-                } catch (RouterException e) {
-                    Debug.e(e.getMessage());
-                }
-            }
-        }).start();
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
             case R.id.menu_switchRouter:
 //                NetworkInfo networkInfo = NetworkUtils.getConnectedNetworkInfo(this);
 //                Debug.anchor(networkInfo);
 //                if (networkInfo != null) {
 //                    getSupportActionBar().setSubtitle("当前Wi-Fi：" + networkInfo.getExtraInfo());
 //                }
-                turnRouter();
+                DlnaManager.asyncSwitchRouter();
                 break;
             case R.id.menu_serviceType: // Default
                 if (iUITimer.isRunning()) {
