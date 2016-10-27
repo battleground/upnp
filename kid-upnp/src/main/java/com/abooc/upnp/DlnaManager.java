@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 
 import com.abooc.util.Debug;
+import com.abooc.widget.Toast;
 
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.controlpoint.SubscriptionCallback;
@@ -24,6 +25,7 @@ import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
 import org.fourthline.cling.support.lastchange.LastChange;
 import org.fourthline.cling.support.model.TransportState;
 import org.fourthline.cling.transport.Router;
+import org.fourthline.cling.transport.RouterException;
 
 import java.util.Map;
 
@@ -255,6 +257,63 @@ public class DlnaManager {
                 Debug.anchor("Missed events: " + numberOfMissedEvents);
             }
         };
+    }
+
+
+    public static void turnOnRouter() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Router router = DlnaManager.getInstance().getBindRouter();
+                    if (router != null) {
+                        Debug.anchor("enable");
+                        router.enable();
+                    }
+                } catch (RouterException e) {
+                    Debug.e(e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    public static void turnOffRouter() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Router router = DlnaManager.getInstance().getBindRouter();
+                    if (router != null) {
+                        Debug.anchor("disable");
+                        router.disable();
+                    }
+                } catch (RouterException e) {
+                    Debug.e(e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    public static void asyncSwitchRouter() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Router router = DlnaManager.getInstance().getBindRouter();
+                    if (router.isEnabled()) {
+                        Toast.show("关闭");
+                        Debug.anchor("disable");
+                        router.disable();
+                    } else {
+                        Toast.show("开启");
+                        Debug.anchor("enable");
+                        router.enable();
+                    }
+                } catch (RouterException e) {
+                    Debug.e(e.getMessage());
+                }
+            }
+        }).start();
     }
 
 }

@@ -20,8 +20,6 @@ import org.fourthline.cling.model.meta.RemoteDeviceIdentity;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
-import org.fourthline.cling.transport.Router;
-import org.fourthline.cling.transport.RouterException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -164,6 +162,8 @@ public class Discovery extends DefaultRegistryListener {
         }
     }
 
+    private boolean isOn = true;
+
     private class WiFi extends BroadcastReceiver {
 
         @Override
@@ -177,7 +177,7 @@ public class Discovery extends DefaultRegistryListener {
                         case CONNECTED:
                             if (!isOn) {
                                 isOn = true;
-                                turnOnRouter();
+                                DlnaManager.turnOnRouter();
                             }
                             break;
                         case DISCONNECTED:
@@ -186,7 +186,7 @@ public class Discovery extends DefaultRegistryListener {
                                 if (mUPnPService != null) {
                                     mUPnPService.getRegistry().removeAllRemoteDevices();
                                 }
-                                turnOffRouter();
+                                DlnaManager.turnOffRouter();
                             }
                             break;
                     }
@@ -194,43 +194,5 @@ public class Discovery extends DefaultRegistryListener {
             }
         }
     }
-
-    private boolean isOn = true;
-
-
-    public static void turnOnRouter() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Router router = DlnaManager.getInstance().getBindRouter();
-                    if (router != null) {
-                        Debug.anchor("enable");
-                        router.enable();
-                    }
-                } catch (RouterException e) {
-                    Debug.e(e.getMessage());
-                }
-            }
-        }).start();
-    }
-
-    public static void turnOffRouter() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Router router = DlnaManager.getInstance().getBindRouter();
-                    if (router != null) {
-                        Debug.anchor("disable");
-                        router.disable();
-                    }
-                } catch (RouterException e) {
-                    Debug.e(e.getMessage());
-                }
-            }
-        }).start();
-    }
-
 
 }
