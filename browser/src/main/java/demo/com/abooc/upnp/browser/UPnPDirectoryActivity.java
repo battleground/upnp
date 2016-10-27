@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.abooc.dlna.media.AppRootContainer;
@@ -21,6 +23,8 @@ import com.abooc.dlna.media.MyHttpServer;
 import com.abooc.dlna.media.UITimer;
 import com.abooc.dlna.media.dlna.UPnPAVTransport;
 import com.abooc.dlna.media.dlna.UPnPBrowse;
+import com.abooc.plugin.about.About;
+import com.abooc.plugin.about.AboutActivity;
 import com.abooc.upnp.AppAndroidUPnPService;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
@@ -59,6 +63,7 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Toast.init(this.getApplicationContext());
+        About.defaultAbout(this);
 
         setContentView(R.layout.activity_upnp_directory);
 
@@ -90,6 +95,22 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
         registerReceiver(iWifiReceiver, intentFilter);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.menu_about:
+                AboutActivity.launch(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     public void onRefresh(View view) {
         if (iUITimer.isRunning()) {
