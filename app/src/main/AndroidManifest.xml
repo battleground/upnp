@@ -33,8 +33,7 @@
 
         <activity
             android:name=".activity.ScanActivity"
-            android:label="扫描设备..."
-            android:parentActivityName=".activity.MainActivity" />
+            android:label="扫描设备..." />
 
         <activity
             android:name=".activity.PlayerActivity"
