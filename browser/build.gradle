@@ -8,8 +8,8 @@ repositories {
 android {
     useLibrary 'org.apache.http.legacy'
 
-    compileSdkVersion 23
-    buildToolsVersion '23.0.3'
+    compileSdkVersion 25
+    buildToolsVersion '25'
 
     defaultConfig {
         applicationId "demo.com.abooc.upnp.browser"
@@ -35,11 +35,11 @@ android {
 
 dependencies {
     compile 'com.abooc.debug:debug-core:latest.integration'
-    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:25.+'
     compile 'com.abooc.plugin:plugin-about:1.0.2'
 //    compile 'com.abooc.upnp:cling-upnp:1.2.11'
     compile project(':kid-upnp')
-    compile 'com.android.support:support-v4:23.4.0'
-    compile 'com.android.support:recyclerview-v7:23.4.0'
+    compile 'com.android.support:support-v4:25.+'
+    compile 'com.android.support:recyclerview-v7:25.+'
     testCompile 'junit:junit:4.12'
 }
