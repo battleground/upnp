@@ -17,11 +17,9 @@ allprojects {
         jcenter()
         mavenCentral()
         mavenLocal()
-        maven {
-            url 'http://4thline.org/m2'
-        }
+        maven { url 'http://4thline.org/m2' }
         maven { url "http://localhost:8081/repository/maven-public/" }
-        maven { url "http://oss.abooc.com/repository/maven-public/" }
+//        maven { url "http://oss.abooc.com/repository/maven-public/" }
     }
 
 }

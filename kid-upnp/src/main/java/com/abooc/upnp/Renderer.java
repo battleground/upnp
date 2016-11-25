@@ -33,7 +33,7 @@ public class Renderer {
 
 
     private Renderer() {
-        Debug.debug();
+        Debug.debugClass();
     }
 
     protected static Renderer build(ControlPoint controlPoint, Device device) {

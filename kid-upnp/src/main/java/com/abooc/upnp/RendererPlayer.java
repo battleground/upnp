@@ -47,7 +47,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
     }
 
     private RendererPlayer() {
-        Debug.debug();
+        Debug.debugClass();
     }
 
     protected static RendererPlayer build(Renderer renderer) {
@@ -128,7 +128,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
             @Override
             public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
 
-                Debug.e(invocation);
+                Debug.error(invocation);
                 onSendFinish(false);
             }
         });
@@ -250,7 +250,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
 
             @Override
             public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
-                Debug.e(operation.toString());
+                Debug.error(operation.toString());
                 onSendFinish(false);
             }
         });
@@ -335,7 +335,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
 
     @Override
     public void finalize() {
-        Debug.e(this);
+        Debug.error(this);
     }
 
     private boolean isRunning;

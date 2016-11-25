@@ -74,7 +74,7 @@ public class DlnaManager {
     }
 
     private DlnaManager() {
-        Debug.debug();
+        Debug.debugClass();
     }
 
     private Context mContext;
@@ -207,7 +207,7 @@ public class DlnaManager {
 
             @Override
             protected void failed(GENASubscription subscription, UpnpResponse response, Exception exception, String defaultMsg) {
-                Debug.e(createDefaultFailureMessage(response, exception));
+                Debug.error(createDefaultFailureMessage(response, exception));
                 hasBound = false;
                 if (mSimpleSubscriptionCallback != null) {
                     mSimpleSubscriptionCallback.failed(subscription, response, exception, defaultMsg);
@@ -271,7 +271,7 @@ public class DlnaManager {
                         router.enable();
                     }
                 } catch (RouterException e) {
-                    Debug.e(e.getMessage());
+                    Debug.error(e.getMessage());
                 }
             }
         }).start();
@@ -288,7 +288,7 @@ public class DlnaManager {
                         router.disable();
                     }
                 } catch (RouterException e) {
-                    Debug.e(e.getMessage());
+                    Debug.error(e.getMessage());
                 }
             }
         }).start();
@@ -310,7 +310,7 @@ public class DlnaManager {
                         router.enable();
                     }
                 } catch (RouterException e) {
-                    Debug.e(e.getMessage());
+                    Debug.error(e.getMessage());
                 }
             }
         }).start();
