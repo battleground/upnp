@@ -280,7 +280,7 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
                     Debug.anchor("enable");
                     router.enable();
                 } catch (RouterException e) {
-                    Debug.e(e.getMessage());
+                    Debug.error(e.getMessage());
                 }
             }
         }).start();
@@ -294,7 +294,7 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
                     Debug.anchor("disable");
                     router.disable();
                 } catch (RouterException e) {
-                    Debug.e(e.getMessage());
+                    Debug.error(e.getMessage());
                 }
             }
         }).start();

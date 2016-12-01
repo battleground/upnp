@@ -49,7 +49,7 @@ public abstract class HttpServer {
     public Response serve(String uri, String method, Properties header,
                           Properties parms, Properties files) {
 
-        Debug.e(method + " '" + uri + "' ");
+        Debug.error(method + " '" + uri + "' ");
         System.out.println(method + " '" + uri + "' ");
 
         Enumeration e = header.propertyNames();

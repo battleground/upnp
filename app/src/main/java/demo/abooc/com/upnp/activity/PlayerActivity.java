@@ -138,7 +138,7 @@ public class PlayerActivity extends AppCompatActivity
 
                 @Override
                 public void onRemotePlayEnd() {
-                    Debug.e("播放完毕");
+                    Debug.error("播放完毕");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

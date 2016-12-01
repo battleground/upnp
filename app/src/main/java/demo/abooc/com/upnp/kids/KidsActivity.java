@@ -320,7 +320,7 @@ public class KidsActivity extends AppCompatActivity
 
             @Override
             protected void failed(GENASubscription subscription, UpnpResponse response, Exception exception, String defaultMsg) {
-                Debug.e(createDefaultFailureMessage(response, exception));
+                Debug.error(createDefaultFailureMessage(response, exception));
                 Toast.show("远端没有响应");
             }
 

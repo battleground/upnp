@@ -57,7 +57,7 @@ public class UPnP {
             Item item = items.get(0);
             return item;
         } catch (Exception e) {
-            Debug.e(e);
+            Debug.error(e);
         }
         return null;
     }

@@ -90,7 +90,7 @@ public class UPnPBrowse extends UPnPExecute {
                     }
                     Debug.anchor(buffer.toString());
                 } catch (Exception e) {
-                    Debug.e("Creating DIDL tree nodes failed: " + e);
+                    Debug.error("Creating DIDL tree nodes failed: " + e);
                     actionInvocation.setFailure(new ActionException(
                             ErrorCode.ACTION_FAILED,
                             "Can't create list childs: " + e, e));
