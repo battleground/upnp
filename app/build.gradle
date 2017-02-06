@@ -30,8 +30,8 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:25.+'
-    compile 'com.abooc.plugin:plugin-about:1.0.2'
+    compile 'com.abooc.plugin:plugin-about:1.+'
     //    compile 'com.abooc.upnp:cling-upnp:1.0.1'
     compile project(':kid-upnp')
-    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'com.google.code.gson:gson:2.+'
 }

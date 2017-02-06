@@ -11,6 +11,7 @@ import com.abooc.upnp.DlnaManager;
 import com.abooc.widget.Toast;
 
 import demo.abooc.com.upnp.R;
+import demo.abooc.com.upnp.kids.KidsActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,7 +41,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onLaunchKids(View view) {
-//        KidsActivity.launch(this);
+        KidsActivity.launch(this);
+    }
+
+    public void onLaunchAbout(View view) {
         AboutActivity.launch(this);
     }
 
@@ -50,4 +54,5 @@ public class MainActivity extends AppCompatActivity {
         DlnaManager.getInstance().stop();
         Discovery.get().exit(this);
     }
+
 }

@@ -1,4 +1,4 @@
-package com.abooc.upnp;//package com.baofeng.fengmi.dlna;
+package com.abooc.upnp;
 
 import android.content.ComponentName;
 import android.content.Context;

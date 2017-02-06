@@ -49,6 +49,31 @@ import demo.abooc.com.upnp.UITimer;
 public class ScanActivity extends AppCompatActivity
         implements AdapterView.OnItemClickListener {
 
+
+    /**
+     * 根据IP地址排序
+     */
+    private Comparator<DeviceDisplay> mComparatorByIP = new Comparator<DeviceDisplay>() {
+        @Override
+        public int compare(DeviceDisplay lhs, DeviceDisplay rhs) {
+            String ipThis = lhs.getHost().substring(lhs.getHost().lastIndexOf(".") + 1);
+            Integer intThis = Integer.valueOf(ipThis);
+
+            String anotherHost = rhs.getHost();
+            String ipAnother = anotherHost.substring(anotherHost.lastIndexOf(".") + 1);
+            Integer intAnother = Integer.valueOf(ipAnother);
+
+            if (intThis > intAnother) {
+                return 1;
+            } else if (intThis < intAnother) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+    };
+
+
     public static void launch(Context context) {
         Intent intent = new Intent(context, ScanActivity.class);
         context.startActivity(intent);
@@ -71,27 +96,6 @@ public class ScanActivity extends AppCompatActivity
         mDiscovery = Discovery.get();
         mDiscovery.addDefaultRegistryListener(new DefaultRegistryListener() {
 
-
-            private Comparator<DeviceDisplay> comparator = new Comparator<DeviceDisplay>() {
-                @Override
-                public int compare(DeviceDisplay lhs, DeviceDisplay rhs) {
-                    String ipThis = lhs.getHost().substring(lhs.getHost().lastIndexOf(".") + 1);
-                    Integer intThis = Integer.valueOf(ipThis);
-
-                    String anotherHost = rhs.getHost();
-                    String ipAnother = anotherHost.substring(anotherHost.lastIndexOf(".") + 1);
-                    Integer intAnother = Integer.valueOf(ipAnother);
-
-                    if (intThis > intAnother) {
-                        return 1;
-                    } else if (intThis == intAnother) {
-                        return 0;
-                    } else {
-                        return -1;
-                    }
-                }
-            };
-
             @Override
             public void remoteDeviceAdded(Registry registry, final RemoteDevice device) {
                 runOnUiThread(new Runnable() {
@@ -107,7 +111,7 @@ public class ScanActivity extends AppCompatActivity
 
 
                                 mListAdapter.getList().add(deviceDisplay);
-                                Collections.sort(mListAdapter.getList(), comparator);
+                                Collections.sort(mListAdapter.getList(), mComparatorByIP);
                                 mListAdapter.notifyDataSetChanged();
 
                                 getSupportActionBar().setTitle("请选择设备，已发现" + mListAdapter.getCount() + "个");
