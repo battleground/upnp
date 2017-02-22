@@ -6,17 +6,6 @@ import org.fourthline.cling.support.model.TransportInfo;
 import org.fourthline.cling.support.model.TransportState;
 
 
-interface Info {
-    boolean isPlaying();
-
-    boolean isPause();
-
-    boolean isStop();
-
-    boolean isTransitioning();
-
-}
-
 /**
  * 负责记录远端媒体播放状态、媒体信息、播放进度。
  * <p>
@@ -24,7 +13,7 @@ interface Info {
  * email:allnet@live.cn
  * on 16/7/12.
  */
-public class PlayerInfo implements Info {
+public class PlayerInfo {
 
     private long mVolume;
     private boolean mMute = false;
@@ -37,22 +26,18 @@ public class PlayerInfo implements Info {
     PlayerInfo() {
     }
 
-    @Override
     public boolean isPlaying() {
         return getTransportState() == TransportState.PLAYING;
     }
 
-    @Override
     public boolean isPause() {
         return getTransportState() == TransportState.PAUSED_PLAYBACK;
     }
 
-    @Override
     public boolean isStop() {
         return getTransportState() == TransportState.STOPPED;
     }
 
-    @Override
     public boolean isTransitioning() {
         return getTransportState() == TransportState.TRANSITIONING;
     }

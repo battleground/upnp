@@ -185,7 +185,7 @@ public class ScanActivity extends AppCompatActivity
 //                }
                 DlnaManager.asyncSwitchRouter();
                 break;
-            case R.id.menu_serviceType: // Default
+            case R.id.menu_refresh: // Default
                 if (iUITimer.isRunning()) {
                     iUITimer.cancel();
                 } else {
@@ -231,7 +231,7 @@ public class ScanActivity extends AppCompatActivity
         DeviceIdentity boundIdentity = DlnaManager.getInstance().getBoundIdentity();
 
         Debug.anchor(boundIdentity);
-        mDiscovery.search();
+//        mDiscovery.search();
     }
 
     @Override
@@ -245,8 +245,8 @@ public class ScanActivity extends AppCompatActivity
             getSupportActionBar().setTitle("开始扫描...");
             mEmptyView.setText("扫描中...");
 
-            Discovery.get().removeAll();
-            DlnaManager.getInstance().getUpnpService().getControlPoint().search();
+//            mDiscovery.removeAll();
+            mDiscovery.searchAll();
         }
 
         @Override
@@ -294,6 +294,8 @@ public class ScanActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        // TODO 临时测试
+        DlnaManager.getInstance().stop();
         unregisterReceiver(iWiFiReceiver);
     }
 

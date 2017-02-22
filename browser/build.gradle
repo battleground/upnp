@@ -29,9 +29,8 @@ android {
 }
 
 dependencies {
-    compile 'com.abooc.debug:debug-core:latest.integration'
     compile 'com.android.support:appcompat-v7:25.+'
-    compile 'com.abooc.plugin:plugin-about:1.0.2'
+    compile 'com.abooc.plugin:plugin-about:latest.integration'
 //    compile 'com.abooc.upnp:cling-upnp:1.2.11'
     compile project(':kid-upnp')
     compile 'com.android.support:support-v4:25.+'

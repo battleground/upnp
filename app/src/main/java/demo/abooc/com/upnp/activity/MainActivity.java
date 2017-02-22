@@ -22,8 +22,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DlnaManager.getInstance().startService(this);
-        Discovery.get().init(this);
     }
 
     @Override
@@ -52,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         DlnaManager.getInstance().stop();
-        Discovery.get().exit(this);
+        Discovery.get().unregisterWiFiReceiver(this);
     }
 
 }

@@ -13,6 +13,7 @@ import com.abooc.util.Debug;
 
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.android.NetworkUtils;
+import org.fourthline.cling.model.message.header.STAllHeader;
 import org.fourthline.cling.model.message.header.ServiceTypeHeader;
 import org.fourthline.cling.model.meta.DeviceIdentity;
 import org.fourthline.cling.model.meta.RemoteDevice;
@@ -33,13 +34,11 @@ public class Discovery extends DefaultRegistryListener {
 
     protected AndroidUpnpService mUPnPService;
 
-    private UPnPServiceConnectionReceiver mUPnPServiceReceiver;
     private WiFi mWiFi = new WiFi();
 
     private static Discovery mOur = new Discovery();
 
     private Discovery() {
-        mUPnPServiceReceiver = new UPnPServiceConnectionReceiver();
     }
 
     public static Discovery get() {
@@ -50,41 +49,29 @@ public class Discovery extends DefaultRegistryListener {
         return mUPnPService;
     }
 
-    private class UPnPServiceConnectionReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mUPnPService = DlnaManager.getInstance().getUpnpService();
-            switch (intent.getAction()) {
-                case DlnaManager.ACTION_DLNA_CONNECTION_CONNECTED:
-                    mUPnPService.getRegistry().addListener(Discovery.this);
-
-                    search();
-                    break;
-                case DlnaManager.ACTION_DLNA_CONNECTION_DISCONNECTED:
-                    mUPnPService.getRegistry().removeListener(Discovery.this);
-                    mUPnPService.getRegistry().removeAllRemoteDevices();
-                    break;
-            }
-        }
+    public void setUPnPService(AndroidUpnpService service) {
+        mUPnPService = service;
     }
 
-    public void init(Context context) {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(DlnaManager.ACTION_DLNA_CONNECTION_CONNECTED);
-        intentFilter.addAction(DlnaManager.ACTION_DLNA_CONNECTION_DISCONNECTED);
-        Context applicationContext = context.getApplicationContext();
-        applicationContext.registerReceiver(mUPnPServiceReceiver, intentFilter);
+    public static void startListener(AndroidUpnpService service) {
+        service.getRegistry().addListener(mOur);
+    }
 
+    public static void stopListener(AndroidUpnpService service) {
+        service.getRegistry().removeListener(mOur);
+        service.getRegistry().removeAllRemoteDevices();
+    }
+
+    public void registerWiFiReceiver(Context context) {
         IntentFilter wifiFilter = new IntentFilter();
         wifiFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        Context applicationContext = context.getApplicationContext();
         applicationContext.registerReceiver(mWiFi, wifiFilter);
     }
 
-    public void exit(Context context) {
+    public void unregisterWiFiReceiver(Context context) {
         try {
             Context applicationContext = context.getApplicationContext();
-            applicationContext.unregisterReceiver(mUPnPServiceReceiver);
             applicationContext.unregisterReceiver(mWiFi);
         } catch (Exception e) {
 
@@ -138,6 +125,12 @@ public class Discovery extends DefaultRegistryListener {
         }
     }
 
+    public void searchAll() {
+        if (mUPnPService != null) {
+            mUPnPService.getControlPoint().search(new STAllHeader());
+        }
+    }
+
     private UDAServiceType iUDAServiceType = new UDAServiceType("AVTransport");
 
     public void addDefaultRegistryListener(DefaultRegistryListener listener) {
@@ -148,6 +141,8 @@ public class Discovery extends DefaultRegistryListener {
 
     @Override
     public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
+        String name = Thread.currentThread().getName();
+        Debug.anchor("Thread:" + name);
         super.remoteDeviceAdded(registry, device);
         if (mDefaultRegistryListener != null) {
             mDefaultRegistryListener.remoteDeviceAdded(registry, device);
@@ -168,7 +163,6 @@ public class Discovery extends DefaultRegistryListener {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Debug.anchor(intent.toString());
             if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(intent.getAction())) {
                 NetworkInfo networkInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 boolean isWifi = NetworkUtils.isWifi(networkInfo);

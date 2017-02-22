@@ -10,6 +10,7 @@ import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
 
 import org.fourthline.cling.android.AndroidUpnpService;
+import org.fourthline.cling.android.AndroidUpnpServiceImpl;
 import org.fourthline.cling.controlpoint.SubscriptionCallback;
 import org.fourthline.cling.model.gena.CancelReason;
 import org.fourthline.cling.model.gena.GENASubscription;
@@ -34,29 +35,20 @@ import java.util.Map;
  * email:allnet@live.cn
  * on 16/9/1.
  */
-public class DlnaManager {
+public class DlnaManager implements ServiceConnection {
 
-    public static final String ACTION_DLNA_CONNECTION_CONNECTED = "action.dlna.connection.connected";
-    public static final String ACTION_DLNA_CONNECTION_DISCONNECTED = "action.dlna.connection.disconnected";
+    @Override
+    public void onServiceConnected(ComponentName className, IBinder service) {
+        mUpnpService = (AndroidUpnpService) service;
+        Discovery.get().setUPnPService(mUpnpService);
+        Discovery.startListener(mUpnpService);
+    }
 
-    protected ServiceConnection UPnPServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mUpnpService = (AndroidUpnpService) service;
-
-            Intent intent = new Intent(ACTION_DLNA_CONNECTION_CONNECTED);
-            mContext.sendBroadcast(intent);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName className) {
-            mUpnpService = null;
-            Intent intent = new Intent(ACTION_DLNA_CONNECTION_DISCONNECTED);
-            mContext.sendBroadcast(intent);
-        }
-
-    };
+    @Override
+    public void onServiceDisconnected(ComponentName className) {
+        Discovery.stopListener(mUpnpService);
+        mUpnpService = null;
+    }
 
     private AndroidUpnpService mUpnpService;
     private Device mBoundDevice;
@@ -74,7 +66,6 @@ public class DlnaManager {
     }
 
     private DlnaManager() {
-        Debug.debugClass();
     }
 
     private Context mContext;
@@ -82,12 +73,19 @@ public class DlnaManager {
     public void startService(Context context) {
         mContext = context.getApplicationContext();
         Intent intent = new Intent(mContext, AppAndroidUPnPService.class);
-        mContext.bindService(intent, UPnPServiceConnection, android.app.Service.BIND_AUTO_CREATE);
+//        Intent intent = new Intent(mContext, AndroidUpnpServiceImpl.class);
+        mContext.bindService(intent, this, android.app.Service.BIND_AUTO_CREATE);
     }
 
     public void stop() {
-        mContext.unbindService(UPnPServiceConnection);
         unbound();
+//        mUpnpService.getRegistry().shutdown();
+
+        try {
+            mContext.unbindService(this);
+        }catch (Exception e){
+
+        }
     }
 
     public boolean isOk() {
