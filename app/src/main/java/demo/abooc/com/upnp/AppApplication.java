@@ -16,7 +16,7 @@ public class AppApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        DlnaManager.getInstance().startService(this);
+        DlnaManager.getInstance().startService(this, AppAndroidUPnPService.class);
         Discovery.get().registerWiFiReceiver(this);
     }
 

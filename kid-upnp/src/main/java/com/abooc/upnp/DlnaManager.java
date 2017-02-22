@@ -10,7 +10,6 @@ import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
 
 import org.fourthline.cling.android.AndroidUpnpService;
-import org.fourthline.cling.android.AndroidUpnpServiceImpl;
 import org.fourthline.cling.controlpoint.SubscriptionCallback;
 import org.fourthline.cling.model.gena.CancelReason;
 import org.fourthline.cling.model.gena.GENASubscription;
@@ -70,22 +69,25 @@ public class DlnaManager implements ServiceConnection {
 
     private Context mContext;
 
-    public void startService(Context context) {
+    public void startService(Context context, Class<? extends android.app.Service> serviceClass) {
         mContext = context.getApplicationContext();
-        Intent intent = new Intent(mContext, AppAndroidUPnPService.class);
-//        Intent intent = new Intent(mContext, AndroidUpnpServiceImpl.class);
+        Intent intent = new Intent(mContext, serviceClass);
         mContext.bindService(intent, this, android.app.Service.BIND_AUTO_CREATE);
     }
 
     public void stop() {
         unbound();
-//        mUpnpService.getRegistry().shutdown();
 
         try {
             mContext.unbindService(this);
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
+    }
+
+    public void shutdown() {
+        if (isOk())
+            mUpnpService.getRegistry().shutdown();
     }
 
     public boolean isOk() {
@@ -97,9 +99,8 @@ public class DlnaManager implements ServiceConnection {
     }
 
     public Router getBindRouter() {
-        if (isOk()) {
+        if (isOk())
             return mUpnpService.get().getRouter();
-        }
         return null;
     }
 
