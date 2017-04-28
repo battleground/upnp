@@ -9,7 +9,6 @@ import android.net.wifi.WifiManager;
 
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
-import com.abooc.util.Debug;
 
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.android.NetworkUtils;
@@ -141,8 +140,6 @@ public class Discovery extends DefaultRegistryListener {
 
     @Override
     public void remoteDeviceAdded(Registry registry, RemoteDevice device) {
-        String name = Thread.currentThread().getName();
-        Debug.anchor("Thread:" + name);
         super.remoteDeviceAdded(registry, device);
         if (mDefaultRegistryListener != null) {
             mDefaultRegistryListener.remoteDeviceAdded(registry, device);

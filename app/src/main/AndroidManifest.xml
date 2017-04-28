@@ -19,10 +19,12 @@
         <service android:name=".AppAndroidUPnPService" />
         <service android:name="org.fourthline.cling.android.AndroidUpnpServiceImpl" />
 
-        <activity
-            android:name=".activity.MainActivity"
-            android:icon="@drawable/ic_cast_dark"
-            android:label="DLNA-UPnP投屏"></activity>
+        <activity android:name=".activity.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".kids.KidsActivity"
@@ -30,13 +32,7 @@
 
         <activity
             android:name=".activity.ScanActivity"
-            android:label="扫描设备...">
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:label="扫描设备..." />
 
         <activity
             android:name=".activity.PlayerActivity"

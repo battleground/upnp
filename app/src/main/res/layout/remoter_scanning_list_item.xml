@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:drawable/list_selector_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="12dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginRight="14dp"
+            android:duplicateParentState="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_remoter_tv_nor" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="当前频道名称"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+
+        <ImageView
+            android:id="@+id/checked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingBottom="6dp"
+            android:paddingLeft="9dp"
+            android:paddingRight="9dp"
+            android:paddingTop="6dp"
+            android:src="@drawable/ic_remoter_device_checked" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/model"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="2dp"
+        android:layout_marginLeft="12dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="开发者模式"
+        android:textColor="#AAA"
+        android:textSize="9sp"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/ip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="2dp"
+        android:layout_marginRight="12dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:letterSpacing="0.1"
+        android:singleLine="true"
+        android:text="0.0.0.0"
+        android:textColor="#AAA"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:visibility="visible" />
+
+</FrameLayout>

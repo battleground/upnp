@@ -21,6 +21,7 @@ import com.abooc.upnp.DlnaManager;
 import com.abooc.upnp.RendererPlayer;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
+import com.abooc.upnp.model.IPComparator;
 import com.abooc.util.Debug;
 
 import org.fourthline.cling.android.NetworkUtils;
@@ -37,7 +38,6 @@ import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
 
 import java.util.Collections;
-import java.util.Comparator;
 
 import demo.abooc.com.upnp.DevicesListAdapter;
 import demo.abooc.com.upnp.R;
@@ -50,35 +50,12 @@ public class ScanActivity extends AppCompatActivity
         implements AdapterView.OnItemClickListener {
 
 
-    /**
-     * 根据IP地址排序
-     */
-    private Comparator<DeviceDisplay> mComparatorByIP = new Comparator<DeviceDisplay>() {
-        @Override
-        public int compare(DeviceDisplay lhs, DeviceDisplay rhs) {
-            String ipThis = lhs.getHost().substring(lhs.getHost().lastIndexOf(".") + 1);
-            Integer intThis = Integer.valueOf(ipThis);
-
-            String anotherHost = rhs.getHost();
-            String ipAnother = anotherHost.substring(anotherHost.lastIndexOf(".") + 1);
-            Integer intAnother = Integer.valueOf(ipAnother);
-
-            if (intThis > intAnother) {
-                return 1;
-            } else if (intThis < intAnother) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-    };
-
-
     public static void launch(Context context) {
         Intent intent = new Intent(context, ScanActivity.class);
         context.startActivity(intent);
     }
 
+    private IPComparator mIPComparator = new IPComparator();
     private Discovery mDiscovery;
     private ListView mListView;
     private TextView mEmptyView;
@@ -111,7 +88,7 @@ public class ScanActivity extends AppCompatActivity
 
 
                                 mListAdapter.getList().add(deviceDisplay);
-                                Collections.sort(mListAdapter.getList(), mComparatorByIP);
+                                Collections.sort(mListAdapter.getList(), mIPComparator);
                                 mListAdapter.notifyDataSetChanged();
 
                                 getSupportActionBar().setTitle("请选择设备，已发现" + mListAdapter.getCount() + "个");
@@ -128,6 +105,7 @@ public class ScanActivity extends AppCompatActivity
 
             @Override
             public void remoteDeviceRemoved(Registry registry, final RemoteDevice device) {
+                Debug.anchor(device);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -151,6 +129,9 @@ public class ScanActivity extends AppCompatActivity
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         registerReceiver(iWiFiReceiver, intentFilter);
+
+        iUITimer.start();
+
     }
 
     void initUPnPView() {

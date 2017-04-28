@@ -5,12 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckedTextView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.abooc.upnp.model.DeviceDisplay;
-
-import org.fourthline.cling.model.meta.RemoteDeviceIdentity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,27 +64,44 @@ public class DevicesListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.simple_list_item_2, null);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.remoter_scanning_list_item, null);
+            holder = new ViewHolder(convertView);
+            convertView.setTag(holder);
         }
+        holder = (ViewHolder) convertView.getTag();
 
-        DeviceDisplay device = getItem(position);
-        if (device != null)
-            attach(device, convertView);
+        DeviceDisplay item = getItem(position);
+
+        holder.attachData(item);
         return convertView;
     }
 
-    void attach(DeviceDisplay display, View view) {
-        CheckedTextView nameText = (CheckedTextView) view.findViewById(R.id.name);
-        TextView modelText = (TextView) view.findViewById(R.id.Model);
-        TextView IPText = (TextView) view.findViewById(R.id.IP);
-        nameText.setText(display.getDevice().getFriendlyName());
+    class ViewHolder {
 
+        TextView iNameText;
+        ImageView joinView;
+        TextView modelText;
+        TextView ipText;
 
-        String manufacturer = display.getDevice().getManufacturer();
-        RemoteDeviceIdentity identity = (RemoteDeviceIdentity) display.getOriginDevice().getIdentity();
-        modelText.setText(manufacturer);
-        IPText.setText(identity.getDescriptorURL().getHost());
-        nameText.setChecked(display.isChecked());
+        ViewHolder(View convertView) {
+            iNameText = (TextView) convertView.findViewById(R.id.name);
+            joinView = (ImageView) convertView.findViewById(R.id.checked);
+            modelText = (TextView) convertView.findViewById(R.id.model);
+            modelText.setVisibility(BaofengSupport.isDebug() ? View.VISIBLE : View.INVISIBLE);
+            ipText = (TextView) convertView.findViewById(R.id.ip);
+        }
+
+        void attachData(DeviceDisplay device) {
+            String name = device.getDevice().getFriendlyName();
+            iNameText.setText(name);
+            ipText.setText(device.getHost());
+            joinView.setVisibility(device.isChecked() ? View.VISIBLE : View.INVISIBLE);
+            if (BaofengSupport.isDebug()) {
+                modelText.setText("设备：" + BaofengSupport.getType(device.getOriginDevice()));
+            }
+        }
     }
+
 }

@@ -20,9 +20,6 @@ public class AppApplication extends Application {
         super.onCreate();
         Toast.init(this);
         About.defaultAbout(this);
-
-        DlnaManager.getInstance().startService(this, AppAndroidUPnPService.class);
-        Discovery.get().registerWiFiReceiver(this);
     }
 
     @Override
