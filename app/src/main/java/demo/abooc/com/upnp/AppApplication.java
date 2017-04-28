@@ -4,7 +4,10 @@ import android.app.Application;
 
 import com.abooc.upnp.Discovery;
 import com.abooc.upnp.DlnaManager;
+
+import com.abooc.plugin.about.About;
 import com.abooc.util.Debug;
+import com.abooc.widget.Toast;
 
 /**
  * Created by dayu on 2017/2/22.
@@ -15,8 +18,10 @@ public class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Toast.init(this);
+        About.defaultAbout(this);
 
-        DlnaManager.getInstance().startService(this);
+        DlnaManager.getInstance().startService(this, AppAndroidUPnPService.class);
         Discovery.get().registerWiFiReceiver(this);
     }
 

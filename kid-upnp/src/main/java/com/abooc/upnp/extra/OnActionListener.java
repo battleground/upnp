@@ -5,7 +5,7 @@ public interface OnActionListener {
 
     void onSendFinish(boolean success);
 
-    class SimpleOnActionListener implements OnActionListener {
+    public class SimpleOnActionListener implements OnActionListener {
         public void onSend() {
         }
 

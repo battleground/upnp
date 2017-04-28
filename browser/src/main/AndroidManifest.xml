@@ -15,7 +15,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
-        <service android:name="com.abooc.upnp.AppAndroidUPnPService"></service>
+        <service android:name="demo.abooc.com.upnp.AppAndroidUPnPService"></service>
 
         <activity
             android:name="demo.com.abooc.upnp.browser.UPnPDirectoryActivity"

@@ -1,4 +1,4 @@
-package com.abooc.upnp;
+package demo.abooc.com.upnp;
 
 import org.fourthline.cling.UpnpServiceConfiguration;
 import org.fourthline.cling.android.AndroidUpnpServiceConfiguration;

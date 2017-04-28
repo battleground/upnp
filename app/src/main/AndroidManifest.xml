@@ -16,7 +16,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service android:name="com.abooc.upnp.AppAndroidUPnPService" />
+        <service android:name=".AppAndroidUPnPService" />
+        <service android:name="org.fourthline.cling.android.AndroidUpnpServiceImpl" />
+
         <service android:name="org.fourthline.cling.android.AndroidUpnpServiceImpl" />
 
         <activity

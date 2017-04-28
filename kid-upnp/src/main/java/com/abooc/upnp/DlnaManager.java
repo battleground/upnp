@@ -10,7 +10,6 @@ import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
 
 import org.fourthline.cling.android.AndroidUpnpService;
-import org.fourthline.cling.android.AndroidUpnpServiceImpl;
 import org.fourthline.cling.controlpoint.SubscriptionCallback;
 import org.fourthline.cling.model.gena.CancelReason;
 import org.fourthline.cling.model.gena.GENASubscription;
@@ -24,7 +23,6 @@ import org.fourthline.cling.model.state.StateVariableValue;
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportLastChangeParser;
 import org.fourthline.cling.support.avtransport.lastchange.AVTransportVariable;
 import org.fourthline.cling.support.lastchange.LastChange;
-import org.fourthline.cling.support.model.TransportState;
 import org.fourthline.cling.transport.Router;
 import org.fourthline.cling.transport.RouterException;
 
@@ -70,22 +68,25 @@ public class DlnaManager implements ServiceConnection {
 
     private Context mContext;
 
-    public void startService(Context context) {
+    public void startService(Context context, Class<? extends android.app.Service> serviceClass) {
         mContext = context.getApplicationContext();
-        Intent intent = new Intent(mContext, AppAndroidUPnPService.class);
-//        Intent intent = new Intent(mContext, AndroidUpnpServiceImpl.class);
+        Intent intent = new Intent(mContext, serviceClass);
         mContext.bindService(intent, this, android.app.Service.BIND_AUTO_CREATE);
     }
 
     public void stop() {
         unbound();
-//        mUpnpService.getRegistry().shutdown();
 
         try {
             mContext.unbindService(this);
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
+    }
+
+    public void shutdown() {
+        if (isOk())
+            mUpnpService.getRegistry().shutdown();
     }
 
     public boolean isOk() {
@@ -97,9 +98,8 @@ public class DlnaManager implements ServiceConnection {
     }
 
     public Router getBindRouter() {
-        if (isOk()) {
+        if (isOk())
             return mUpnpService.get().getRouter();
-        }
         return null;
     }
 
@@ -158,36 +158,6 @@ public class DlnaManager implements ServiceConnection {
     }
 
     private SimpleSubscriptionCallback mSimpleSubscriptionCallback;
-
-    abstract class SimpleSubscriptionCallback extends SubscriptionCallback {
-
-        protected SimpleSubscriptionCallback(Service service) {
-            super(service);
-        }
-
-        protected SimpleSubscriptionCallback(Service service, int requestedDurationSeconds) {
-            super(service, requestedDurationSeconds);
-        }
-
-        public abstract void onEventReceived(TransportState state);
-
-        @Override
-        public void eventReceived(GENASubscription sub) {
-        }
-
-        @Override
-        public abstract void failed(GENASubscription subscription, UpnpResponse responseStatus, Exception exception, String defaultMsg);
-
-        @Override
-        public abstract void established(GENASubscription subscription);
-
-        @Override
-        public abstract void ended(GENASubscription subscription, CancelReason reason, UpnpResponse responseStatus);
-
-        @Override
-        public abstract void eventsMissed(GENASubscription subscription, int numberOfMissedEvents);
-
-    }
 
     private SubscriptionCallback createSubscriptionEvent(Service avTransport) {
         return new SubscriptionCallback(avTransport) {
