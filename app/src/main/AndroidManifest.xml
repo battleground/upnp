@@ -19,8 +19,6 @@
         <service android:name=".AppAndroidUPnPService" />
         <service android:name="org.fourthline.cling.android.AndroidUpnpServiceImpl" />
 
-        <service android:name="org.fourthline.cling.android.AndroidUpnpServiceImpl" />
-
         <activity
             android:name=".activity.MainActivity"
             android:icon="@drawable/ic_cast_dark"
