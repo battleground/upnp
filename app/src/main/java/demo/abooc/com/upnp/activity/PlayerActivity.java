@@ -202,23 +202,25 @@ public class PlayerActivity extends AppCompatActivity
         mRendererPlayer.getMediaInfo(mMediaInfoCallback);
         mRenderer.getMute();
 
-        mRenderer.execute(new GetVolume(mRenderer.getRenderingControlService()) {
-            @Override
-            public void received(ActionInvocation invocation, final int volume) {
-                Debug.anchor(volume);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mVideoPlayerView.setVolume(volume);
-                        mVideoPlayerView.seekVolume(volume);
-                    }
-                });
-            }
+        if (mRenderer.isRenderingControl()) {
+            mRenderer.execute(new GetVolume(mRenderer.getRenderingControlService()) {
+                @Override
+                public void received(ActionInvocation invocation, final int volume) {
+                    Debug.anchor(volume);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mVideoPlayerView.setVolume(volume);
+                            mVideoPlayerView.seekVolume(volume);
+                        }
+                    });
+                }
 
-            @Override
-            public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
-            }
-        });
+                @Override
+                public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
+                }
+            });
+        }
 
     }
 
@@ -231,12 +233,17 @@ public class PlayerActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.Play:
+                Device boundDevice = DlnaManager.getInstance().getBoundDevice();
+                Renderer.debug(boundDevice);
+
                 if (mRenderer.getPlayerInfo().isStop()
                         || mRenderer.getPlayerInfo().getTransportState() == TransportState.NO_MEDIA_PRESENT) {
+                    Debug.anchor();
 //                    mRendererPlayer.addCallback(onSendListener);
 //                    flyVideo();
                     flyImage(AppTestResources.imageUri);
                 } else {
+                    Debug.anchor();
                     mRendererPlayer.play();
                 }
                 mVideoPlayerView.setState(TransportState.PLAYING);
@@ -409,29 +416,31 @@ public class PlayerActivity extends AppCompatActivity
         url = "http://192.168.8.171:8196/ImageItem-226";
         url = "http://images.apple.com/v/home/cx/images/gallery/iphone_square_large.jpg";
         Res res = UPnP.buildRes("image/jpeg", "filePath", url, 0);
-        Photo videoItem = new Photo("1", String.valueOf(1), "图来了", "unknown", "unknown", res);
+        Photo videoItem = new Photo("1", String.valueOf(1), "图来了", null, null, res);
         String metadata = UPnP.buildMetadataXml(videoItem);
         mRendererPlayer.start(url, metadata);
     }
 
     public void onGetVolumeEvent(View view) {
-        mRenderer.execute(new GetVolume(mRenderer.getRenderingControlService()) {
-            @Override
-            public void received(ActionInvocation invocation, final int volume) {
-                Debug.anchor(volume);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mRenderer.getPlayerInfo().updateVolume(volume);
-                        mVideoPlayerView.setVolume(volume);
-                    }
-                });
-            }
+        if (mRenderer.isRenderingControl()) {
+            mRenderer.execute(new GetVolume(mRenderer.getRenderingControlService()) {
+                @Override
+                public void received(ActionInvocation invocation, final int volume) {
+                    Debug.anchor(volume);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mRenderer.getPlayerInfo().updateVolume(volume);
+                            mVideoPlayerView.setVolume(volume);
+                        }
+                    });
+                }
 
-            @Override
-            public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
-            }
-        });
+                @Override
+                public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
+                }
+            });
+        }
     }
 
     public void onGetMediaInfoEvent(View view) {

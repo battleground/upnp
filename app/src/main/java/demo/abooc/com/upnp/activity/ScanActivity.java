@@ -18,11 +18,13 @@ import android.widget.TextView;
 
 import com.abooc.upnp.Discovery;
 import com.abooc.upnp.DlnaManager;
-import com.abooc.upnp.RendererPlayer;
+import com.abooc.upnp.Renderer;
+import com.abooc.upnp.extra.Filter;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.upnp.model.IPComparator;
 import com.abooc.util.Debug;
+import com.abooc.widget.Toast;
 
 import org.fourthline.cling.android.NetworkUtils;
 import org.fourthline.cling.model.message.header.DeviceTypeHeader;
@@ -32,7 +34,7 @@ import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.DeviceIdentity;
 import org.fourthline.cling.model.meta.RemoteDevice;
 import org.fourthline.cling.model.meta.RemoteDeviceIdentity;
-import org.fourthline.cling.model.types.DeviceType;
+import org.fourthline.cling.model.types.UDADeviceType;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.registry.DefaultRegistryListener;
 import org.fourthline.cling.registry.Registry;
@@ -62,6 +64,15 @@ public class ScanActivity extends AppCompatActivity
     private DevicesListAdapter mListAdapter;
     private WiFiReceiver iWiFiReceiver;
 
+    Filter filter = new Filter() {
+        @Override
+        public boolean check(Device device) {
+//            UDADeviceType deviceType = new UDADeviceType("MediaRenderer");
+//            return device.findDevices(deviceType) != null;
+            return true;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,11 +86,15 @@ public class ScanActivity extends AppCompatActivity
 
             @Override
             public void remoteDeviceAdded(Registry registry, final RemoteDevice device) {
+                Debug.anchor(device.getDetails().getFriendlyName() + " " + device);
+
+                Renderer.debug(device);
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        CDevice cDevice = new CDevice(device);
-                        if (cDevice.asService("AVTransport")) {
+                        if (filter.check(device)) {
+                            CDevice cDevice = new CDevice(device);
                             DeviceDisplay deviceDisplay = new DeviceDisplay(cDevice);
                             if (!mListAdapter.getList().contains(deviceDisplay)) {
                                 RemoteDeviceIdentity identity = device.getIdentity();
@@ -91,7 +106,9 @@ public class ScanActivity extends AppCompatActivity
                                 Collections.sort(mListAdapter.getList(), mIPComparator);
                                 mListAdapter.notifyDataSetChanged();
 
-                                getSupportActionBar().setTitle("请选择设备，已发现" + mListAdapter.getCount() + "个");
+                                if (!iUITimer.isRunning()) {
+                                    getSupportActionBar().setTitle("已发现" + mListAdapter.getCount() + "个");
+                                }
 
                                 DeviceIdentity boundIdentity = DlnaManager.getInstance().getBoundIdentity();
                                 if (device.getIdentity().equals(boundIdentity)) {
@@ -105,7 +122,7 @@ public class ScanActivity extends AppCompatActivity
 
             @Override
             public void remoteDeviceRemoved(Registry registry, final RemoteDevice device) {
-                Debug.anchor(device);
+                Debug.anchor(device.getDetails().getFriendlyName() + " " + device);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -117,7 +134,10 @@ public class ScanActivity extends AppCompatActivity
                                 mEmptyView.setText("没有可用的设备");
                             }
                         }
-                        getSupportActionBar().setTitle("请选择设备，已发现" + mListAdapter.getCount() + "个");
+
+                        if (!iUITimer.isRunning()) {
+                            getSupportActionBar().setTitle("已发现" + mListAdapter.getCount() + "个");
+                        }
                     }
                 });
             }
@@ -189,7 +209,7 @@ public class ScanActivity extends AppCompatActivity
                     iUITimer.cancel();
                 } else {
                     iUITimer.start();
-                    DeviceType type = new DeviceType("schemas-upnp-org", "MediaRenderer", 1);
+                    UDADeviceType type = new UDADeviceType("MediaRenderer");
                     DlnaManager.getInstance().getUpnpService().getControlPoint().search(new DeviceTypeHeader(type));
                 }
                 break;
@@ -226,7 +246,7 @@ public class ScanActivity extends AppCompatActivity
             getSupportActionBar().setTitle("开始扫描...");
             mEmptyView.setText("扫描中...");
 
-//            mDiscovery.removeAll();
+            mDiscovery.removeAll();
             mDiscovery.searchAll();
         }
 
@@ -238,6 +258,7 @@ public class ScanActivity extends AppCompatActivity
         @Override
         public void onFinish() {
             Debug.anchor();
+            getSupportActionBar().setTitle("已发现" + mListAdapter.getCount() + "个");
             if (mListAdapter.isEmpty()) {
                 mEmptyView.setText("未找到可用的设备");
             } else {
@@ -249,34 +270,31 @@ public class ScanActivity extends AppCompatActivity
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         DeviceDisplay mDeviceDisplay = mListAdapter.getItem(position);
-        mDeviceDisplay.setChecked(true);
         setTitle(mDeviceDisplay.getDevice().getFriendlyName());
 
-        CDevice cDevice = (CDevice) mDeviceDisplay.getDevice();
-        Device device = cDevice.getDevice();
+        Device device = mDeviceDisplay.getOriginDevice();
+        Renderer.debug(device);
 
-
+        boolean bind;
         if (DlnaManager.getInstance().hasBound()) {
-            DeviceIdentity boundIdentity = DlnaManager.getInstance().getBoundIdentity();
-            if (!boundIdentity.equals(device.getIdentity())) {
-                // 停止掉当前投放的视频
-                RendererPlayer.get().stop();
-                DlnaManager.getInstance().unbound();
-                DlnaManager.getInstance().bind(device, null);
-            }
+            DlnaManager.getInstance().unbound();
+            bind = DlnaManager.getInstance().bind(device, null);
         } else {
-            DlnaManager.getInstance().bind(device, null);
+            bind = DlnaManager.getInstance().bind(device, null);
         }
+        mDeviceDisplay.setChecked(bind);
 
-        PlayerActivity.launch(this);
-        finish();
+        if (bind) {
+            PlayerActivity.launch(this);
+            finish();
+        } else {
+            Toast.show("DLNA服务错误！");
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // TODO 临时测试
-        DlnaManager.getInstance().stop();
         unregisterReceiver(iWiFiReceiver);
     }
 

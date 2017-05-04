@@ -105,18 +105,23 @@ public class DlnaManager implements ServiceConnection {
 
     public boolean bind(Device device, SimpleSubscriptionCallback callback) {
         if (isOk()) {
+            Renderer renderer = Renderer.build(mUpnpService.getControlPoint(), device);
+            RendererPlayer.build(renderer);
 
-            mBoundDevice = device;
-            iDeviceIdentity = device.getIdentity();
-            mHost = ((RemoteDeviceIdentity) iDeviceIdentity).getDescriptorURL().getHost();
-            mSimpleSubscriptionCallback = callback;
+            if (renderer.isRenderingControl()
+                    && renderer.isAVTransport()) {
+                Service avTransportService = renderer.getAVTransportService();
+                SubscriptionCallback subscriptionEvent = createSubscriptionEvent(avTransportService);
+                mUpnpService.getControlPoint().execute(subscriptionEvent);
 
-            Renderer build = Renderer.build(mUpnpService.getControlPoint(), device);
-            RendererPlayer.build(build);
-            Service avTransportService = build.getAVTransportService();
-            SubscriptionCallback subscriptionEvent = createSubscriptionEvent(avTransportService);
-            mUpnpService.getControlPoint().execute(subscriptionEvent);
-            return true;
+                mBoundDevice = device;
+                iDeviceIdentity = device.getIdentity();
+                mHost = ((RemoteDeviceIdentity) iDeviceIdentity).getDescriptorURL().getHost();
+                mSimpleSubscriptionCallback = callback;
+                return true;
+            } else {
+                return false;
+            }
         }
         return false;
     }

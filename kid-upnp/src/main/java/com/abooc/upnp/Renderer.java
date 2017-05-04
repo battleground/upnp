@@ -9,6 +9,7 @@ import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.Service;
+import org.fourthline.cling.model.types.UDADeviceType;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.support.avtransport.callback.GetPositionInfo;
 import org.fourthline.cling.support.renderingcontrol.callback.GetMute;
@@ -56,7 +57,8 @@ public class Renderer {
     }
 
     public Service getRenderingControlService() {
-        return mDevice.findService(new UDAServiceType("RenderingControl"));
+        UDAServiceType renderingControl = new UDAServiceType("RenderingControl");
+        return mDevice.findService(renderingControl);
     }
 
     public boolean isRenderingControl() {
@@ -65,6 +67,12 @@ public class Renderer {
 
     public boolean isAVTransport() {
         return getAVTransportService() != null;
+    }
+
+    public boolean isMediaRenderer() {
+        UDADeviceType deviceType = new UDADeviceType("MediaRenderer");
+        Device[] devices = mDevice.findDevices(deviceType);
+        return devices != null;
     }
 
     public PlayerInfo getPlayerInfo() {
@@ -155,5 +163,28 @@ public class Renderer {
         });
     }
 
+
+    public static void debug(Device device) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(device.getDetails().getFriendlyName()).append("\n");
+        buffer.append("services:").append("\n");
+        Service[] services = device.findServices();
+        for (Service service : services) {
+            String type = service.getServiceType().getType();
+            buffer.append(service.getClass().getName() + ", " + type).append("\n");
+        }
+        buffer.append("\n");
+
+        UDAServiceType renderingControl = new UDAServiceType("RenderingControl");
+        UDADeviceType deviceType = new UDADeviceType("MediaRenderer");
+
+        buffer.append("devices:").append("\n");
+        Device[] devices = device.findDevices(renderingControl);
+        for (Device d : devices) {
+            buffer.append(d.getClass().getName() + ", " + d.getType()).append("\n");
+        }
+        Debug.anchor(buffer.toString());
+
+    }
 
 }
