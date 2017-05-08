@@ -1,5 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="demo.abooc.com.upnp">
+    package="com.abooc.dmr">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -13,32 +14,20 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <service android:name=".AppAndroidUPnPService" />
-        <!--<service android:name="org.fourthline.cling.android.AndroidUpnpServiceImpl" />-->
 
-        <activity android:name=".activity.MainActivity">
+        <service android:name="org.fourthline.cling.android.AndroidUpnpServiceImpl" />
+
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".kids.KidsActivity"
-            android:label="Kid-UPnP" />
-
-        <activity
-            android:name=".activity.ScanActivity"
-            android:label="扫描设备..." />
-
-        <activity
-            android:name=".activity.PlayerActivity"
-            android:icon="@android:drawable/ic_media_play"
-            android:label="远程播放"
-            android:launchMode="singleTop" />
-
     </application>
+
 </manifest>

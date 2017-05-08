@@ -35,17 +35,27 @@ import java.util.Map;
  */
 public class DlnaManager implements ServiceConnection {
 
+    private ServiceConnection iServiceConnection;
+
     @Override
     public void onServiceConnected(ComponentName className, IBinder service) {
         mUpnpService = (AndroidUpnpService) service;
         Discovery.get().setUPnPService(mUpnpService);
         Discovery.startListener(mUpnpService);
+
+        if (iServiceConnection != null) {
+            iServiceConnection.onServiceConnected(className, service);
+        }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName className) {
         Discovery.stopListener(mUpnpService);
         mUpnpService = null;
+
+        if (iServiceConnection != null) {
+            iServiceConnection.onServiceDisconnected(className);
+        }
     }
 
     private AndroidUpnpService mUpnpService;
@@ -64,6 +74,10 @@ public class DlnaManager implements ServiceConnection {
     }
 
     private DlnaManager() {
+    }
+
+    public void setServiceConnection(ServiceConnection serviceConnection) {
+        iServiceConnection = serviceConnection;
     }
 
     private Context mContext;
