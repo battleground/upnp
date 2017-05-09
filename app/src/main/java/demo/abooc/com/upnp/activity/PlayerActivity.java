@@ -233,9 +233,6 @@ public class PlayerActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.Play:
-                Device boundDevice = DlnaManager.getInstance().getBoundDevice();
-                Renderer.debug(boundDevice);
-
                 if (mRenderer.getPlayerInfo().isStop()
                         || mRenderer.getPlayerInfo().getTransportState() == TransportState.NO_MEDIA_PRESENT) {
                     Debug.anchor();

@@ -67,9 +67,9 @@ public class ScanActivity extends AppCompatActivity
     Filter filter = new Filter() {
         @Override
         public boolean check(Device device) {
-//            UDADeviceType deviceType = new UDADeviceType("MediaRenderer");
-//            return device.findDevices(deviceType) != null;
-            return true;
+            UDADeviceType deviceType = new UDADeviceType("MediaRenderer");
+            return device.findDevices(deviceType) != null;
+//            return true;
         }
     };
 
@@ -273,7 +273,7 @@ public class ScanActivity extends AppCompatActivity
         setTitle(mDeviceDisplay.getDevice().getFriendlyName());
 
         Device device = mDeviceDisplay.getOriginDevice();
-        Renderer.debug(device);
+        Renderer.debug((RemoteDevice) device);
 
         boolean bind;
         if (DlnaManager.getInstance().hasBound()) {

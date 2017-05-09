@@ -8,6 +8,8 @@ import org.fourthline.cling.controlpoint.ControlPoint;
 import org.fourthline.cling.model.action.ActionInvocation;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Device;
+import org.fourthline.cling.model.meta.RemoteDevice;
+import org.fourthline.cling.model.meta.RemoteService;
 import org.fourthline.cling.model.meta.Service;
 import org.fourthline.cling.model.types.UDADeviceType;
 import org.fourthline.cling.model.types.UDAServiceType;
@@ -164,11 +166,12 @@ public class Renderer {
     }
 
 
-    public static void debug(Device device) {
+    public static void debug(RemoteDevice device) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(device.getDetails().getFriendlyName()).append("\n");
         buffer.append("services:").append("\n");
-        Service[] services = device.findServices();
+        RemoteService[] services = device.getServices();
+//        Service[] services = device.findServices();
         for (Service service : services) {
             String type = service.getServiceType().getType();
             buffer.append(service.getClass().getName() + ", " + type).append("\n");
