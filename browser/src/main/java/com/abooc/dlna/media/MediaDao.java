@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 
+import com.abooc.util.Debug;
+
 import org.fourthline.cling.support.model.DIDLObject;
 import org.fourthline.cling.support.model.PersonWithRole;
 import org.fourthline.cling.support.model.Res;
@@ -103,6 +105,9 @@ public class MediaDao {
                 String url = buildUrl(clazz, String.valueOf(id));
                 Item item = new Item(String.valueOf(id), "0", title, "creator", clazz);
                 items.add(item);
+
+                String key = "/" + AppRootContainer.VIDEO_PREFIX + id;
+                cacheMap.put(key, filePath);
             }
         }
         return items;
@@ -147,7 +152,8 @@ public class MediaDao {
                 VideoItem videoItem = new VideoItem(String.valueOf(id), AppRootContainer.VIDEO_ID, filename, creator, res);
                 items.add(videoItem);
 
-                cacheMap.put("/" + id, filePath);
+                String key = "/" + AppRootContainer.VIDEO_PREFIX + id;
+                cacheMap.put(key, filePath);
             }
         }
         return items;
@@ -190,7 +196,8 @@ public class MediaDao {
                         new PersonWithRole(creator, "Performer"), res);
                 items.add(musicTrack);
 
-                cacheMap.put("/" + id, filePath);
+                String key = "/" + AppRootContainer.AUDIO_PREFIX + id;
+                cacheMap.put(key, filePath);
             }
         }
         return items;
@@ -222,7 +229,8 @@ public class MediaDao {
                 ImageItem imageItem = new ImageItem(String.valueOf(id), AppRootContainer.IMAGE_ID, filename, creator, res);
                 items.add(imageItem);
 
-                cacheMap.put("/" + id, filePath);
+                String key = "/" + AppRootContainer.IMAGE_PREFIX + id;
+                cacheMap.put(key, filePath);
             }
         }
         return items;

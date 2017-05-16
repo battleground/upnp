@@ -21,19 +21,15 @@ import com.abooc.dlna.media.AppRootContainer;
 import com.abooc.dlna.media.MediaDao;
 import com.abooc.dlna.media.MyHttpServer;
 import com.abooc.dlna.media.UITimer;
-import com.abooc.dlna.media.dlna.UPnPAVTransport;
-import com.abooc.dlna.media.dlna.UPnPBrowse;
 import com.abooc.plugin.about.About;
 import com.abooc.plugin.about.AboutActivity;
-import com.abooc.upnp.AppAndroidUPnPService;
 import com.abooc.upnp.model.CDevice;
 import com.abooc.upnp.model.DeviceDisplay;
 import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
 
-import demo.com.abooc.upnp.browser.utils.IPUtil;
-
 import org.fourthline.cling.android.AndroidUpnpService;
+import org.fourthline.cling.android.AndroidUpnpServiceImpl;
 import org.fourthline.cling.android.NetworkUtils;
 import org.fourthline.cling.model.meta.Device;
 import org.fourthline.cling.model.meta.Service;
@@ -47,17 +43,19 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import demo.com.abooc.upnp.browser.utils.IPUtil;
+
 public class UPnPDirectoryActivity extends AppCompatActivity {
 
 
-    UPnPAVTransport mUPnPAVTransport;
+    UPnPPresenter mUPnPPresenter;
 
     LibrariesFragment iLibrariesFragment;
     PlayerListFragment iPlayerListFragment;
     ContentListFragment iContentListFragment;
 
     private WifiReceiver iWifiReceiver = new WifiReceiver();
-    private DeviceDisplay devices;
+    private DeviceDisplay device;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +84,7 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
         iPlayerListFragment = (PlayerListFragment) getSupportFragmentManager().findFragmentById(R.id.PlayerListFragment);
         iContentListFragment = (ContentListFragment) getSupportFragmentManager().findFragmentById(R.id.ContentListFragment);
 
-        Intent service = new Intent(getApplicationContext(), AppAndroidUPnPService.class);
+        Intent service = new Intent(getApplicationContext(), AndroidUpnpServiceImpl.class);
         bindService(service, iServiceConnection, android.app.Service.BIND_AUTO_CREATE);
 
 
@@ -126,9 +124,10 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
             Debug.anchor();
             Toast.show("开始扫描...");
 
-            upnpService.getRegistry().removeAllRemoteDevices();
+            AndroidUpnpService uPnPService = mUPnPPresenter.getUPnPService();
+            uPnPService.getRegistry().removeAllRemoteDevices();
 
-            upnpService.getControlPoint().search();
+            uPnPService.getControlPoint().search();
         }
 
         @Override
@@ -142,8 +141,6 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
         }
     };
 
-    private int mPlayerSelection = -1;
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -152,18 +149,13 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
         unregisterReceiver(iWifiReceiver);
     }
 
-
-    private AndroidUpnpService upnpService;
-    UPnPBrowse mUPnPBrowse;
-
     private ServiceConnection iServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Debug.anchor(name);
-            upnpService = (AndroidUpnpService) service;
-            mUPnPAVTransport = new UPnPAVTransport(upnpService);
-            mUPnPBrowse = new UPnPBrowse(upnpService);
-            mUPnPBrowse.setUIHandler(iContentListFragment.getHandler());
+            AndroidUpnpService upnpService = (AndroidUpnpService) service;
+            mUPnPPresenter = new UPnPPresenter(upnpService);
+            iContentListFragment.setPresenter(mUPnPPresenter);
 
             upnpService.getControlPoint().search();
 
@@ -212,10 +204,13 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
     };
 
 
-    public void setDevices(DeviceDisplay devices) {
-        this.devices = devices;
+    public void setDevice(DeviceDisplay device) {
+        this.device = device;
     }
 
+    public DeviceDisplay getDevice() {
+        return this.device;
+    }
 
     private class WifiReceiver extends BroadcastReceiver {
 
@@ -231,8 +226,8 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
                             if (!isOn) {
                                 isOn = true;
 
-                                if (upnpService != null) {
-                                    Router router = upnpService.get().getRouter();
+                                if (mUPnPPresenter != null) {
+                                    Router router = mUPnPPresenter.getUPnPService().get().getRouter();
                                     turnOnRouter(router);
                                 }
 
@@ -249,8 +244,8 @@ public class UPnPDirectoryActivity extends AppCompatActivity {
                             if (isOn) {
                                 isOn = false;
 
-                                if (upnpService != null) {
-                                    Router router = upnpService.get().getRouter();
+                                if (mUPnPPresenter != null) {
+                                    Router router = mUPnPPresenter.getUPnPService().get().getRouter();
                                     turnOffRouter(router);
                                 }
                                 iPlayerListFragment.clear();

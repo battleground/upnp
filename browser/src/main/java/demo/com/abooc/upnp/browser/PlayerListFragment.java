@@ -92,7 +92,7 @@ public class PlayerListFragment extends Fragment {
             DeviceDisplay display = (DeviceDisplay) mPlayerListAdapter.getItem(position);
             Debug.anchor(display);
 
-            mMainActivity.setDevices(display);
+            mMainActivity.setDevice(display);
         }
     };
 

@@ -1,5 +1,5 @@
 include ':app'
-include ':cling'
+//include ':cling'
 //include ':dmr'
-//include ':browser'
+include ':browser'
 include ':kid-upnp'

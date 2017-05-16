@@ -17,7 +17,7 @@ public class UPnPAVTransport extends UPnPExecute {
 
     public void start(final Service service, String uri, String metadata) {
 
-        Debug.anchor(uri);
+        Debug.anchor(uri + "\n" + metadata);
 
 
 
