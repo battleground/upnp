@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -18,9 +19,7 @@
         <!--<service android:name="demo.abooc.com.upnp.AppAndroidUPnPService"></service>-->
         <service android:name="org.fourthline.cling.android.AndroidUpnpServiceImpl" />
 
-        <activity
-            android:name="demo.com.abooc.upnp.browser.UPnPDirectoryActivity"
-            android:label="UPnPDirectory">
+        <activity android:name="demo.com.abooc.upnp.browser.UPnPDirectoryActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
