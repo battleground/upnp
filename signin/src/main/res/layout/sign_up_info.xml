@@ -51,6 +51,8 @@
         android:layout_marginRight="32dp"
         android:layout_marginTop="4dp"
         android:background="#DDD"
+        android:imeOptions="actionNext"
+        android:nextFocusDown="@+id/sign_in_password"
         android:onClick="onSelectedEdit"
         android:padding="12dp"
         android:singleLine="true" />

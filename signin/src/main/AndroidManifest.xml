@@ -15,7 +15,7 @@
 
         <activity
             android:name=".SignActivity"
-            android:windowSoftInputMode="stateHidden|stateAlwaysHidden|adjustNothing" >
+            android:windowSoftInputMode="stateHidden|adjustNothing" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
