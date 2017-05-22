@@ -10,6 +10,7 @@ import com.abooc.util.Debug;
 import com.abooc.widget.Toast;
 
 import org.fourthline.cling.android.AndroidUpnpService;
+import org.fourthline.cling.android.FixedAndroidLogHandler;
 import org.fourthline.cling.controlpoint.SubscriptionCallback;
 import org.fourthline.cling.model.gena.CancelReason;
 import org.fourthline.cling.model.gena.GENASubscription;
@@ -27,6 +28,8 @@ import org.fourthline.cling.transport.Router;
 import org.fourthline.cling.transport.RouterException;
 
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by author:李瑞宇
@@ -74,6 +77,9 @@ public class DlnaManager implements ServiceConnection {
     }
 
     private DlnaManager() {
+        org.seamless.util.logging.LoggingUtil.resetRootHandler(
+                new FixedAndroidLogHandler()
+        );
     }
 
     public void setServiceConnection(ServiceConnection serviceConnection) {
@@ -303,4 +309,22 @@ public class DlnaManager implements ServiceConnection {
         }).start();
     }
 
+    /**
+     * 开关log
+     */
+    public void setLoggerEnable(boolean loggerEnable) {
+        Logger logger = Logger.getLogger("org.fourthline.cling");
+        if (logger != null) {
+            //打开Log
+            if (loggerEnable) {
+                logger.setLevel(Level.FINEST);
+            }
+            //关闭Log
+            else {
+                if (logger.getLevel() != null && !logger.getLevel().equals(Level.INFO)) {
+                    logger.setLevel(Level.INFO);
+                }
+            }
+        }
+    }
 }
