@@ -7,7 +7,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="登录 / 注册"
+        android:gravity="center"
+        android:text="新版\n\n登录 | 注册 \n\n效果调试"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
         android:textColor="#666"
         android:textStyle="bold" />

@@ -11,27 +11,32 @@
         android:theme="@style/AppTheme">
 
         <activity android:name=".WelcomeActivity">
-        </activity>
-
-        <activity android:name=".ChatActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden|adjustPan" >
-        </activity>
-
-        <activity
-            android:name=".FullScreenSignActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden|adjustResize"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-        <!--<activity-->
-            <!--android:name=".FullScreenSignActivity"-->
-            <!--android:screenOrientation="portrait"-->
-            <!--android:windowSoftInputMode="stateHidden|adjustNothing|adjustResize" >-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".DevListActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"/>
+
+        <activity
+            android:name=".CustomActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden"></activity>
+
+        <activity
+            android:name=".FullScreenSignActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize">
+            <!--<activity-->
+            <!--android:name=".FullScreenSignActivity"-->
+            <!--android:screenOrientation="portrait"-->
+            <!--android:windowSoftInputMode="stateHidden|adjustNothing|adjustResize" >-->
         </activity>
 
     </application>

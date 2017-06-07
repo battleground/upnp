@@ -31,7 +31,7 @@
             android:onClick="onClose"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_sign_close"
-            android:visibility="invisible" />
+            android:visibility="visible" />
     </LinearLayout>
 
 
@@ -53,7 +53,7 @@
             android:background="#DDD"
             android:imeOptions="actionNext"
             android:nextFocusDown="@+id/sign_in_password"
-            android:padding="12dp"
+            android:padding="8dp"
             android:singleLine="true" />
 
         <EditText
@@ -65,7 +65,7 @@
             android:background="#DDD"
             android:imeActionLabel="登录"
             android:imeOptions="actionGo"
-            android:padding="12dp"
+            android:padding="8dp"
             android:singleLine="true" />
 
         <FrameLayout

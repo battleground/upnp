@@ -1,11 +1,18 @@
 package com.abooc.signin;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class ChatActivity extends AppCompatActivity {
+public class CustomActivity extends AppCompatActivity {
+
+    public static void launch(Context context) {
+        Intent intent = new Intent(context, CustomActivity.class);
+        context.startActivity(intent);
+    }
 
     private FrameLayout sign_layout;
     private KeyboardWatcher mKeyboardWatcher;
@@ -15,7 +22,7 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 //                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_chat);
+        setContentView(R.layout.activity_custom);
         sign_layout = (FrameLayout) findViewById(R.id.sign_layout);
         mKeyboardWatcher = new KeyboardWatcher(getWindow().getDecorView());
 
@@ -77,7 +84,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void onClose(View view) {
-//        super.onBackPressed();
+        super.onBackPressed();
     }
 
     @Override

@@ -1,21 +1,22 @@
 package com.abooc.signin;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.AnimationUtils;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Space;
 
 import com.abooc.util.Debug;
 
-public class FullScreenSignActivity extends Activity {
+//public class FullScreenSignActivity extends Activity {
+public class FullScreenSignActivity extends AppCompatActivity {
 
     public static void launch(Context context) {
         Intent intent = new Intent(context, FullScreenSignActivity.class);
@@ -30,6 +31,10 @@ public class FullScreenSignActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowManager.LayoutParams localLayoutParams = getWindow().getAttributes();
+        localLayoutParams.flags = (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | localLayoutParams.flags);
+        getWindow().setAttributes(localLayoutParams);
+
         setContentView(R.layout.activity_fullscreen_sign);
 
         final View rootView = findViewById(R.id.rootView);
@@ -47,18 +52,13 @@ public class FullScreenSignActivity extends Activity {
         sign_layout = (FrameLayout) findViewById(R.id.sign_layout);
         bottomFillSpace = (Space) findViewById(R.id.bottomFillSpace);
 
-        View signIn = sign_layout.findViewById(R.id.sign_in);
-        signIn.setVisibility(View.VISIBLE);
-        signIn.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
-
         mKeyboardWatcher = new KeyboardWatcher(getWindow().getDecorView());
         mKeyboardWatcher.setWatcherListener(new OnSoftKeyboardStateChangedListener() {
             @Override
             public void onSoftKeyboardStateChanged(boolean isShowing, int keyboardHeight) {
                 if (isShowing) {
                     ViewGroup.LayoutParams layoutParams = bottomFillSpace.getLayoutParams();
-                    layoutParams.height = keyboardHeight - mKeyboardWatcher.getStatusBarHeight() * 4;
-//                    layoutParams.height = keyboardHeight;
+                    layoutParams.height = keyboardHeight + mKeyboardWatcher.getStatusBarHeight();
                     bottomFillSpace.setLayoutParams(layoutParams);
                     bottomFillSpace.setVisibility(View.VISIBLE);
                 } else {
@@ -71,7 +71,7 @@ public class FullScreenSignActivity extends Activity {
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-        Debug.anchor("hardKeyboardHidden:" + newConfig.hardKeyboardHidden + ", screenLayout:" + newConfig.screenLayout +"" + newConfig.toString());
+        Debug.anchor("hardKeyboardHidden:" + newConfig.hardKeyboardHidden + ", screenLayout:" + newConfig.screenLayout + "" + newConfig.toString());
         super.onConfigurationChanged(newConfig);
     }
 
@@ -131,7 +131,7 @@ public class FullScreenSignActivity extends Activity {
     }
 
     public void onClose(View view) {
-//        super.onBackPressed();
+        super.onBackPressed();
     }
 
     @Override

@@ -9,10 +9,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="12dp"
         android:layout_marginLeft="32dp"
         android:layout_marginRight="18dp"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="12dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -22,7 +22,7 @@
             android:layout_weight="1"
             android:text="注册"
             android:textColor="#444"
-            android:textSize="26sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
         <ImageView
@@ -44,7 +44,7 @@
         android:background="#DDD"
         android:imeOptions="actionNext"
         android:nextFocusDown="@+id/sign_in_password"
-        android:padding="12dp"
+        android:padding="8dp"
         android:singleLine="true" />
 
     <EditText
@@ -55,7 +55,7 @@
         android:layout_marginRight="32dp"
         android:layout_marginTop="6dp"
         android:background="#DDD"
-        android:padding="12dp"
+        android:padding="8dp"
         android:singleLine="true" />
 
     <TextView
