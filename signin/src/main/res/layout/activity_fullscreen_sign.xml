@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:fitsSystemWindows="true"
+    android:onClick="onHideKeyboard">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="-200dp"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/ic_sign_background" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/sign_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="-8dp"
+            android:animateLayoutChanges="true"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp">
+
+            <include
+                layout="@layout/sign_in"
+                android:visibility="visible" />
+
+            <include
+                layout="@layout/sign_up"
+                android:visibility="gone" />
+
+            <include
+                layout="@layout/sign_up_info"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <Space
+            android:id="@+id/bottomFillSpace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+</FrameLayout>

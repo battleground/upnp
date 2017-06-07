@@ -28,6 +28,7 @@
         <ImageView
             android:layout_width="42dp"
             android:layout_height="42dp"
+            android:clickable="true"
             android:onClick="onBackSignUp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_sign_back" />
@@ -53,7 +54,6 @@
         android:background="#DDD"
         android:imeOptions="actionNext"
         android:nextFocusDown="@+id/sign_in_password"
-        android:onClick="onSelectedEdit"
         android:padding="12dp"
         android:singleLine="true" />
 
@@ -68,7 +68,6 @@
         android:background="#DDD"
         android:imeActionLabel="登录"
         android:imeOptions="actionDone"
-        android:onClick="onSelectedEdit"
         android:padding="12dp"
         android:singleLine="true" />
 
@@ -76,6 +75,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#fcd203"
+        android:clickable="true"
         android:gravity="center"
         android:onClick="onLoginEvent"
         android:padding="12dp"

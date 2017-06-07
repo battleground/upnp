@@ -26,7 +26,7 @@ public class WelcomeActivity extends AppCompatActivity {
             @Override
             public void handleMessage(Message msg) {
                 WelcomeActivity.super.onBackPressed();
-                SignActivity.launch(WelcomeActivity.this);
+                FullScreenSignActivity.launch(WelcomeActivity.this);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
         }.sendEmptyMessageDelayed(0, 3000);

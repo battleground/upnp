@@ -13,9 +13,20 @@
         <activity android:name=".WelcomeActivity">
         </activity>
 
+        <activity android:name=".ChatActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" >
+        </activity>
+
         <activity
-            android:name=".SignActivity"
-            android:windowSoftInputMode="stateHidden|adjustNothing" >
+            android:name=".FullScreenSignActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        <!--<activity-->
+            <!--android:name=".FullScreenSignActivity"-->
+            <!--android:screenOrientation="portrait"-->
+            <!--android:windowSoftInputMode="stateHidden|adjustNothing|adjustResize" >-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
