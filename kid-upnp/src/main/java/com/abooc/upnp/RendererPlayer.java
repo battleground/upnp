@@ -268,6 +268,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
 
             @Override
             public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
+                onSendFinish(false);
             }
         });
     }
@@ -288,6 +289,7 @@ public class RendererPlayer implements Runnable, Player, OnActionListener {
 
             @Override
             public void failure(ActionInvocation invocation, UpnpResponse operation, String defaultMsg) {
+                onSendFinish(false);
             }
         });
     }
